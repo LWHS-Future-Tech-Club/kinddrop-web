@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Minimalist theme: light background, muted text, single accent color; keep Instrument Serif for headings and use Inter for body text */
+@layer base {
+  :root {
+    /* Purple gradient variables (restored) */
+    --bg-gradient-start: #3C0F67;
+    --bg-gradient-middle: #52218C;
+    --bg-gradient-end: #05051A;
+
+    /* Primary accent */
+    --primary: #8A3CFF;
+    --primary-bright: #A054FF;
+
+    /* Text colors for dark purple background */
+    --text-primary: #FFFFFF;
+    --text-muted: rgba(217,200,255,0.9);
+
+    /* Card/Input Background */
+    --surface: rgba(48, 19, 79, 0.42);
+    --border: rgba(138, 60, 255, 0.18);
+
+    --radius: 0.75rem;
+    --font-size: 16px;
+  }
+
+  * {
+    @apply border-transparent;
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  body {
+    background: linear-gradient(180deg, var(--bg-gradient-start), var(--bg-gradient-middle) 45%, var(--bg-gradient-end));
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Keep serif for headings for a tasteful contrast */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Instrument Serif', serif;
+    color: var(--text-primary);
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    line-height: 1.15;
+    font-weight: 600;
+  }
+
+  p, span, a, small, li {
+    color: var(--text-muted);
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    line-height: 1.6;
+  }
+}
+
+@layer components {
+  /* Simple card */
+  .glass-card {
+    background: var(--surface);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 24px rgba(5,5,26,0.25);
+    padding: 1rem;
+  }
+
+  /* Minimal button (keeps existing class name to avoid breaking usages) */
+  .btn-glow {
+    background: linear-gradient(135deg, rgba(55,18,87,0.9), var(--primary));
+    color: #fff;
+    border: 1px solid rgba(138,60,255,0.12);
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.25rem;
+    font-weight: 600;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(138,60,255,0.12);
+  }
+
+  .btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 36px rgba(138,60,255,0.18);
+  }
+
+  .btn-glow:active {
+    transform: translateY(0);
+    box-shadow: 0 6px 12px rgba(138,60,255,0.08);
+  }
+
+  /* Subtle utility for emphasis text if used */
+  .text-glow {
+    color: var(--text-primary);
+    text-shadow: 0 0 18px rgba(138,60,255,0.12);
+  }
+
+  /* Minimal input */
+  .input-glass {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    color: var(--text-primary);
+    padding: 0.55rem 0.75rem;
+    box-shadow: none;
+  }
+
+  .input-glass:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 6px rgba(138,60,255,0.05);
+  }
+
+  .input-glass::placeholder {
+    color: rgba(217,200,255,0.4);
+  }
+}
