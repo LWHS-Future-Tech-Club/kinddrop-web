@@ -51,7 +51,7 @@ export function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/dashboard">
-                <button className="btn-glow text-lg px-8 py-4">Get Started Free</button>
+                <button className="btn-outline text-lg px-8 py-4">Get Started Free</button>
               </Link>
             </div>
 

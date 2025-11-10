@@ -32,13 +32,13 @@ export function MessageFeed({ messages }: MessageFeedProps) {
 
   if (messages.length === 0) {
     return (
-      <Card className="border-dashed">
+      <Card className="glass-card border-dashed border-purple-500/30">
         <CardContent className="py-16 text-center">
-          <div className="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <Inbox className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 mx-auto bg-purple-500/20 rounded-full flex items-center justify-center mb-4">
+            <Inbox className="w-8 h-8 text-purple-400" />
           </div>
-          <h3 className="text-gray-900 mb-2">No messages yet</h3>
-          <p className="text-gray-500">
+          <h3 className="text-white text-xl font-semibold mb-2">No messages yet</h3>
+          <p className="text-white/70">
             Your sent and received messages will appear here
           </p>
         </CardContent>
@@ -51,8 +51,8 @@ export function MessageFeed({ messages }: MessageFeedProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-gray-900">Your Messages</h2>
-          <p className="text-gray-500">
+          <h2 className="text-white text-xl font-semibold">Your Messages</h2>
+          <p className="text-white/70">
             {messages.length} message{messages.length !== 1 ? 's' : ''}
           </p>
         </div>
@@ -67,11 +67,11 @@ export function MessageFeed({ messages }: MessageFeedProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: index * 0.05 }}
           >
-            <Card>
+            <Card className="glass-card border-purple-500/30">
               <CardContent className="p-6 space-y-4">
                 {/* Message */}
                 <div
-                  className="p-5 rounded-lg border border-gray-200"
+                  className="p-5 rounded-lg border border-purple-500/30 bg-white/5"
                   style={{
                     fontFamily: message.customization.fontFamily,
                     color: message.customization.color,
@@ -84,7 +84,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
 
                 {/* Metadata */}
                 <div className="flex items-center justify-between">
-                  <Badge variant="outline">
+                  <Badge variant="outline" className="border-purple-500/50 text-purple-300 bg-purple-500/10">
                     {message.type === 'sent' ? (
                       <>
                         <Send className="w-3 h-3 mr-1" />
@@ -97,7 +97,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                       </>
                     )}
                   </Badge>
-                  <span className="text-gray-500">{formatTimestamp(message.timestamp)}</span>
+                  <span className="text-white/70">{formatTimestamp(message.timestamp)}</span>
                 </div>
               </CardContent>
             </Card>

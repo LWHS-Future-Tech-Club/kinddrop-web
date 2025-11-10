@@ -51,33 +51,33 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
   return (
     <div className="space-y-8">
       {/* Points Card */}
-      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+      <Card className="glass-card bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-sm">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-sm">
                 <ShoppingBag className="w-7 h-7 text-white" />
               </div>
               <div>
-                <div className="text-gray-600 mb-1">Your Balance</div>
+                <div className="text-white/70 mb-1">Your Balance</div>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-gray-900">{points}</span>
-                  <span className="text-gray-600">points</span>
+                  <span className="text-white text-2xl font-bold">{points}</span>
+                  <span className="text-white/70">points</span>
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-gray-600">Send messages</div>
-              <div className="text-gray-600">to earn more</div>
+              <div className="text-white/70">Send messages</div>
+              <div className="text-white/70">to earn more</div>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Info Alert */}
-      <Alert>
-        <Info className="h-4 w-4" />
-        <AlertDescription>
+      <Alert className="glass-card border-purple-500/30 bg-purple-900/20">
+        <Info className="h-4 w-4 text-purple-400" />
+        <AlertDescription className="text-white/80">
           Unlock customizations to personalize your kindness messages. Each item can be used when composing messages.
         </AlertDescription>
       </Alert>
@@ -93,13 +93,13 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: categoryIndex * 0.1 }}
           >
-            <Card>
+            <Card className="glass-card border-purple-500/30">
               <CardHeader>
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">{category.icon}</span>
                   <div>
-                    <CardTitle>{category.title}</CardTitle>
-                    <CardDescription>{category.description}</CardDescription>
+                    <CardTitle className="text-white">{category.title}</CardTitle>
+                    <CardDescription className="text-white/70">{category.description}</CardDescription>
                   </div>
                 </div>
               </CardHeader>
@@ -115,27 +115,27 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
                         key={item.id}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           isUnlocked
-                            ? 'border-green-200 bg-green-50'
-                            : 'border-gray-200 bg-white hover:border-gray-300'
+                            ? 'border-green-400/50 bg-green-900/20'
+                            : 'border-purple-500/30 bg-white/5 hover:border-purple-500/50 hover:bg-white/10'
                         }`}
                       >
                         {/* Preview */}
                         <div className="mb-3">
                           {item.type === 'color' || item.type === 'background' ? (
                             <div
-                              className="w-full h-16 rounded-md border-2 border-gray-200"
+                              className="w-full h-16 rounded-md border-2 border-purple-500/30"
                               style={{ backgroundColor: item.value }}
                             />
                           ) : item.type === 'font' ? (
                             <div
-                              className="text-center py-3 bg-gray-50 rounded-md border border-gray-200"
+                              className="text-center py-3 bg-white/10 rounded-md border border-purple-500/30 text-white"
                               style={{ fontFamily: item.value }}
                             >
                               Aa Bb Cc
                             </div>
                           ) : (
                             <div
-                              className="text-center py-3 bg-gray-50 rounded-md border border-gray-200"
+                              className="text-center py-3 bg-white/10 rounded-md border border-purple-500/30 text-white"
                               style={{
                                 fontSize:
                                   item.value === 'small' ? '12px' : item.value === 'large' ? '20px' : '16px'
@@ -149,9 +149,9 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
                         {/* Info */}
                         <div className="space-y-3">
                           <div className="flex items-start justify-between gap-2">
-                            <span className="text-gray-900">{item.name}</span>
+                            <span className="text-white font-medium">{item.name}</span>
                             {isUnlocked && (
-                              <Badge variant="outline" className="bg-green-100 border-green-300 text-green-700 shrink-0">
+                              <Badge variant="outline" className="bg-green-500/20 border-green-400/50 text-green-300 shrink-0">
                                 <Check className="w-3 h-3" />
                               </Badge>
                             )}
@@ -159,8 +159,8 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
 
                           {!isUnlocked && (
                             <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-1 text-gray-600">
-                                <Sparkles className="w-4 h-4 text-amber-500" />
+                              <div className="flex items-center gap-1 text-white/70">
+                                <Sparkles className="w-4 h-4 text-purple-400" />
                                 <span>{item.cost} pts</span>
                               </div>
                               <Button
@@ -168,7 +168,7 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
                                 onClick={() => onUnlock(item)}
                                 disabled={!canAfford || item.cost === 0}
                                 variant={canAfford && item.cost > 0 ? 'default' : 'secondary'}
-                                className={canAfford && item.cost > 0 ? 'bg-gray-900 hover:bg-gray-800' : ''}
+                                className={canAfford && item.cost > 0 ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white' : 'bg-white/10 text-white/50'}
                               >
                                 {!canAfford ? (
                                   <>
