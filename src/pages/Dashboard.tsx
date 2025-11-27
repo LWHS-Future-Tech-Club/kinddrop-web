@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -39,6 +40,7 @@ export interface ShopItem {
 }
 
 export function Dashboard() {
+  const router = useRouter();
   const [points, setPoints] = useState<number>(50);
   const [messages, setMessages] = useState<Message[]>([]);
   const [unlockedItems, setUnlockedItems] = useState<string[]>(['font-sans', 'color-black', 'bg-white', 'size-medium']);
@@ -64,6 +66,16 @@ export function Dashboard() {
       setUserEmail(null);
     }
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    } catch (err) {}
+    try {
+      localStorage.removeItem('kinddrop_user');
+    } catch (storageErr) {}
+    router.push('/login');
+  };
 
   const handleSendMessage = (text: string) => {
     const newMessage: Message = {
@@ -121,12 +133,10 @@ export function Dashboard() {
                 <div className="text-sm text-[var(--text-muted)]">Guest</div>
               )}
 
-              <Link href="/">
-                <Button variant="outline" size="sm">
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </Button>
-              </Link>
+              <Button variant="outline" size="sm" onClick={handleLogout}>
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
         </div>

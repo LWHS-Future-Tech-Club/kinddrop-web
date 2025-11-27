@@ -1,4 +1,6 @@
+
 'use client';
+import React from 'react';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -6,19 +8,48 @@ import { useRouter } from 'next/navigation';
 import { Heart } from 'lucide-react';
 
 export function SignUpPage() {
+
+
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // store a simple user entry so other pages can read it while we don't have real auth
-    try {
-      localStorage.setItem('kinddrop_user', JSON.stringify({ email }));
-    } catch (err) {
-      // ignore
+  // Redirect if already logged in
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      const userCookie = cookies.find(c => c.startsWith('user='));
+      if (userCookie && userCookie.length > 5) {
+        router.replace('/dashboard');
+      }
     }
-    router.push('/dashboard');
+  }, [router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    try {
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        try {
+          localStorage.setItem('kinddrop_user', JSON.stringify({ email: data.user?.email ?? email }));
+        } catch (storageErr) {
+          console.error(storageErr);
+        }
+        router.push('/dashboard');
+      } else {
+        setError(data.error || 'Signup failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Signup failed');
+    }
   };
 
   return (
@@ -61,6 +92,9 @@ export function SignUpPage() {
             <button type="submit" className="btn-glow w-full py-3">
               Sign Up
             </button>
+            {error && (
+              <div className="text-red-500 text-center mt-2">{error}</div>
+            )}
           </form>
 
           <p className="mt-6 text-center">

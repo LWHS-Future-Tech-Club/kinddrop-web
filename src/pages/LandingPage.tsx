@@ -1,10 +1,33 @@
 'use client';
 
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Heart, Send, Sparkles } from 'lucide-react';
 
 export function LandingPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = () => {
+      try {
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('kinddrop_user') : null;
+        setIsLoggedIn(!!stored);
+      } catch {
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkAuth();
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'kinddrop_user') {
+        checkAuth();
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="glass-card mx-6 my-6 px-8 py-4">
@@ -17,14 +40,22 @@ export function LandingPage() {
           </Link>
 
           <div className="flex items-center gap-4">
-            <Link href="/login">
-              <button className="px-6 py-2 text-[var(--text-lavender)] hover:text-white transition-colors">
-                Log In
-              </button>
-            </Link>
-            <Link href="/signup">
-              <button className="btn-glow">Sign Up</button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard">
+                <button className="btn-glow">Dashboard</button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <button className="px-6 py-2 text-[var(--text-lavender)] hover:text-white transition-colors">
+                    Log In
+                  </button>
+                </Link>
+                <Link href="/signup">
+                  <button className="btn-glow">Sign Up</button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
