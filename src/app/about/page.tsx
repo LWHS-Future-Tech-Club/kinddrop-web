@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Heart } from 'lucide-react';
 
-export function AboutPage() {
+export default function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="glass-header mx-6 my-6 px-8 py-4">
@@ -38,4 +38,3 @@ export function AboutPage() {
   );
 }
 
-export default AboutPage;

@@ -1,4 +1,4 @@
-import { MessageCustomization } from '../pages/Dashboard';
+import { MessageCustomization } from '@/app/dashboard/Dashboard';
 import { Check } from 'lucide-react';
 
 interface StylePickerProps {

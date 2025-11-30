@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
-import { MessageCustomization } from '../pages/Dashboard';
+import { MessageCustomization } from '@/app/dashboard/Dashboard';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 

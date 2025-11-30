@@ -1,14 +1,12 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
-
 import { Dashboard } from '@/app/dashboard/Dashboard'
 
-export default function DashboardPage() {
-  const cookieStore = cookies()
-  const userCookie = cookieStore.get('user')
+export default async function DashboardPage() {
+  const cookieStore = await cookies();
+  const userCookie = cookieStore.get('user');
   if (!userCookie || !userCookie.value) {
-    redirect('/login')
+    redirect('/login');
   }
-
-  return <Dashboard />
+  return <Dashboard />;
 }
