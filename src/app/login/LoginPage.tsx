@@ -56,7 +56,7 @@ export function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Link href="/" className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
             <Heart className="w-7 h-7 text-white" />
           </div>
           <span className="text-3xl font-bold text-glow">KindDrop</span>

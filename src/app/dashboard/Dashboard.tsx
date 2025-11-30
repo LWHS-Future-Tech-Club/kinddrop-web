@@ -110,10 +110,10 @@ export function Dashboard() {
     <div className="min-h-screen">
       <ThankYouPopup show={showThanks} pointsAdded={lastPointsAdded} onClose={() => setShowThanks(false)} />
       {/* Header */}
-      <header className="glass-card mx-6 my-6 px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="glass-header mx-6 my-6 px-8 py-4">
+        <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
               <Heart className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-glow">KindDrop</span>
@@ -127,11 +127,18 @@ export function Dashboard() {
             </div>
 
             <div className="flex items-center gap-4">
-              {userEmail ? (
+              {/* {userEmail ? (
                 <div className="text-sm text-[var(--text-muted)]">Signed in as <span className="font-medium text-white">{userEmail}</span></div>
               ) : (
                 <div className="text-sm text-[var(--text-muted)]">Guest</div>
-              )}
+              )} */}
+
+              <Link href="/settings">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Sun className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
 
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
@@ -142,24 +149,16 @@ export function Dashboard() {
         </div>
       </header>
 
-      {/* Hero */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <h1 className="text-3xl font-bold mb-2 text-glow">Your Daily Dose of Brightness</h1>
-          <p className="text-[var(--text-muted)] max-w-2xl">Send messages of encouragement and positivity. Brighten someone's day and earn points to unlock customizations.</p>
-        </motion.div>
-      </div>
-
       {/* Main */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="send" className="space-y-8">
-          <TabsList className="grid w-full grid-cols-3 max-w-md mx-auto bg-white/5 border border-[var(--border)]">
-            <TabsTrigger value="send">Send</TabsTrigger>
-            <TabsTrigger value="messages">Messages</TabsTrigger>
-            <TabsTrigger value="shop">Shop</TabsTrigger>
+      <main className="max-w-6xl mx-auto px-0 py-0">
+        <Tabs defaultValue="send" className="space-y-0">
+          <TabsList className="w-full max-w-3xl mx-auto h-8">
+            <TabsTrigger value="send" className="py-0">Send</TabsTrigger>
+            <TabsTrigger value="messages" className="py-0">Messages</TabsTrigger>
+            <TabsTrigger value="shop" className="py-0">Shop</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="send">
+          <TabsContent value="send" className="pt-0">
             <div className="max-w-3xl mx-auto">
               <MessageComposer
                 onSend={handleSendMessage}
@@ -170,13 +169,13 @@ export function Dashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="messages">
+          <TabsContent value="messages" className="pt-0">
             <div className="max-w-3xl mx-auto">
               <MessageFeed messages={messages} />
             </div>
           </TabsContent>
 
-          <TabsContent value="shop">
+          <TabsContent value="shop" className="pt-0">
             <div className="max-w-5xl mx-auto">
               <ShopSection points={points} unlockedItems={unlockedItems} onUnlock={handleUnlockItem} />
             </div>

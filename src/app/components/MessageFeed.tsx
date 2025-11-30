@@ -1,4 +1,4 @@
-import { Message } from '../pages/Dashboard';
+import { Message } from '@/app/dashboard/Dashboard';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Heart, Send, Inbox } from 'lucide-react';
