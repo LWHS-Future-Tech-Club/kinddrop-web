@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 
-import { Dashboard } from '@/pages/Dashboard'
+import { Dashboard } from '@/app/dashboard/Dashboard'
 
 export default function DashboardPage() {
   const cookieStore = cookies()

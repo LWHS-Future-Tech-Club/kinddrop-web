@@ -73,7 +73,7 @@ export function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/dashboard">
-                <button className="btn-outline text-lg px-8 py-4">Create a free account</button>
+                <button className="btn-outline text-lg px-8 py-4">Get Started for Free</button>
               </Link>
             </div>
           </motion.div>

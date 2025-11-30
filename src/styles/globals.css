@@ -269,7 +269,7 @@
   .btn-outline {
     background: transparent;
     color: var(--text-primary);
-    border: none;
+    border: 2px solid var(--primary);
     border-radius: 9999px;
     padding: 0.6rem 1.25rem;
     font-weight: 400;

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import '@/styles/globals.css'
 import '@/index.css'
-import { FloatingGlow } from '@/components/FloatingGlow'
+import { FloatingGlow } from '@/app/components/FloatingGlow'
 
 export const metadata: Metadata = {
   title: 'KindDrop',

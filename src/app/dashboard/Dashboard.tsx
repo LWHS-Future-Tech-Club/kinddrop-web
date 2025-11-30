@@ -127,11 +127,18 @@ export function Dashboard() {
             </div>
 
             <div className="flex items-center gap-4">
-              {userEmail ? (
+              {/* {userEmail ? (
                 <div className="text-sm text-[var(--text-muted)]">Signed in as <span className="font-medium text-white">{userEmail}</span></div>
               ) : (
                 <div className="text-sm text-[var(--text-muted)]">Guest</div>
-              )}
+              )} */}
+
+              <Link href="/settings">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Sun className="w-4 h-4 mr-2" />
+                  Settings
+                </Button>
+              </Link>
 
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="w-4 h-4 mr-2" />
