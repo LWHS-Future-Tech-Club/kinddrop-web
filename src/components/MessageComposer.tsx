@@ -27,71 +27,7 @@ export function MessageComposer({
   };
 
   return (
-    <div className="min-h-[700px] flex items-center justify-center relative overflow-hidden rounded-2xl bg-gradient-to-b from-purple-900 via-purple-800 to-purple-700 p-8">
-      {/* Sparkle decorations */}
-      <motion.div
-        className="absolute top-20 left-20 text-purple-300"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.5, 1, 0.5],
-        }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
-        <Sparkles className="w-6 h-6" />
-      </motion.div>
-      
-      <motion.div
-        className="absolute top-40 right-32 text-purple-300"
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.3, 0.8, 0.3],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 0.5
-        }}
-      >
-        <Sparkles className="w-4 h-4" />
-      </motion.div>
-
-      <motion.div
-        className="absolute bottom-32 left-40 text-purple-300"
-        animate={{
-          scale: [1, 1.4, 1],
-          opacity: [0.4, 1, 0.4],
-        }}
-        transition={{
-          duration: 2.5,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1
-        }}
-      >
-        <Sparkles className="w-5 h-5" />
-      </motion.div>
-
-      <motion.div
-        className="absolute bottom-20 right-20 text-purple-300"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.5, 0.9, 0.5],
-        }}
-        transition={{
-          duration: 2.2,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 1.5
-        }}
-      >
-        <Sparkles className="w-4 h-4" />
-      </motion.div>
-
+    <div className="min-h-[700px] flex items-center justify-center relative overflow-hidden rounded-2xl p-8">
       {/* Main Content */}
   <div className="max-w-4xl w-full space-y-8 text-center relative z-10">
         {/* Main Message */}
@@ -99,10 +35,9 @@ export function MessageComposer({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-white text-4xl md:text-5xl"
-          style={{ fontFamily: 'serif' }}
+          className="text-4xl md:text-5xl text-glow"
         >
-          Be the reason someone smiles today.
+          Welcome back, FTC!
         </motion.h1>
 
         {/* Quote */}
@@ -110,10 +45,8 @@ export function MessageComposer({
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="text-purple-200 italic"
-          style={{ fontFamily: 'serif' }}
         >
-          "Be kind, for everyone you meet is fighting a hard battle." – Plato
+          There's a message waiting for you! Send a message to view it.
         </motion.p>
 
         {/* Form */}
@@ -129,8 +62,7 @@ export function MessageComposer({
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Make them feel loved..."
-            className="min-h-[300px] md:min-h-[360px] resize-none bg-white/10 border-2 border-purple-400/30 text-white placeholder:text-purple-300/60 backdrop-blur-sm focus:border-purple-300 focus:bg-white/15 transition-all rounded-3xl text-center p-8 text-lg md:text-xl"
-            style={{ fontFamily: 'serif' }}
+            className="min-h-[300px] md:min-h-[360px] resize-none input-glass rounded-3xl text-center p-8 text-lg md:text-xl"
           />
 
           {/* Send Button */}
@@ -141,10 +73,6 @@ export function MessageComposer({
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               className="send-button-custom"
-              style={{ 
-                fontFamily: "'Instrument Serif', serif",
-                fontStyle: 'italic'
-              }}
               whileHover={message.trim() ? { scale: 1.02 } : {}}
               whileTap={message.trim() ? { scale: 0.98 } : {}}
               transition={{ duration: 0.2 }}

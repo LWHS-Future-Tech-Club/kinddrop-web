@@ -6,10 +6,10 @@ import { Heart } from 'lucide-react';
 export function AboutPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="glass-card mx-6 my-6 px-8 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <header className="glass-header mx-6 my-6 px-8 py-4">
+        <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
               <Heart className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-bold text-glow">KindDrop</span>
