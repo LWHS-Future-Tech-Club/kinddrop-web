@@ -10,17 +10,21 @@ interface MessageComposerProps {
   currentCustomization: MessageCustomization;
   unlockedItems: string[];
   onCustomizationChange: (customization: Partial<MessageCustomization>) => void;
+  disabled?: boolean;
+  username?: string;
 }
 
 export function MessageComposer({ 
-  onSend
+  onSend,
+  disabled = false,
+  username = 'Friend'
 }: MessageComposerProps) {
   const [message, setMessage] = useState('');
   const [isHovered, setIsHovered] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim()) {
+    if (message.trim() && !disabled) {
       onSend(message);
       setMessage('');
     }
@@ -37,7 +41,7 @@ export function MessageComposer({
           transition={{ duration: 0.8 }}
           className="text-4xl md:text-5xl text-glow"
         >
-          Welcome back, FTC!
+          Welcome back, {username}!
         </motion.h1>
 
         {/* Quote */}
@@ -46,7 +50,7 @@ export function MessageComposer({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
         >
-          There's a message waiting for you! Send a message to view it.
+          {disabled ? 'You have already sent a message today. Come back tomorrow!' : "There's a message waiting for you! Send a message to view it."}
         </motion.p>
 
         {/* Form */}
@@ -63,18 +67,19 @@ export function MessageComposer({
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Make them feel loved..."
             className="min-h-[300px] md:min-h-[360px] resize-none input-glass rounded-3xl text-center p-8 text-lg md:text-xl"
+            disabled={disabled}
           />
 
           {/* Send Button */}
           <div className="relative inline-block mt-10">
             <motion.button
               type="submit"
-              disabled={!message.trim()}
+              disabled={!message.trim() || disabled}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               className="send-button-custom"
-              whileHover={message.trim() ? { scale: 1.02 } : {}}
-              whileTap={message.trim() ? { scale: 0.98 } : {}}
+              whileHover={message.trim() && !disabled ? { scale: 1.02 } : {}}
+              whileTap={message.trim() && !disabled ? { scale: 0.98 } : {}}
               transition={{ duration: 0.2 }}
             >
               send

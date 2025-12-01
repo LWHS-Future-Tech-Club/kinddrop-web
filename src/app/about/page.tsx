@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AboutPage() {
   return (
@@ -9,9 +9,7 @@ export default function AboutPage() {
       <header className="glass-header mx-6 my-6 px-8 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
-              <Heart className="w-6 h-6 text-white" />
-            </div>
+            <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
             <span className="text-2xl font-bold text-glow">KindDrop</span>
           </Link>
           <div className="flex items-center gap-4">
@@ -25,15 +23,18 @@ export default function AboutPage() {
         <div className="max-w-4xl mx-auto glass-card p-12">
           <h1 className="text-5xl font-bold mb-8 text-glow">About KindDrop</h1>
           <p className="text-xl mb-6">We believe in the power of small acts of kindness to create meaningful change in the world.</p>
-          <p className="text-xl">Every message counts. We help you track and celebrate your positive impact on others.</p>
+          <p className="text-xl mb-6">Every message counts. We help you track and celebrate your positive impact on others.</p>
+
+          <h2 className="text-3xl font-semibold mt-8 mb-4">Credits</h2>
+          <ul className="text-xl space-y-2">
+            <li><span className="font-semibold">Front End:</span> Aaron Chen</li>
+            <li><span className="font-semibold">Back End:</span> Rudy Pandit</li>
+            <li><span className="font-semibold">Misc:</span> Sathvik, Chris, Arya, Ryan</li>
+          </ul>
         </div>
       </main>
 
-      <footer className="glass-card mx-6 mb-6 px-8 py-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <span>© 2025 KindDrop. Made with ❤️ for spreading kindness.</span>
-        </div>
-      </footer>
+      
     </div>
   );
 }

@@ -67,7 +67,7 @@ export default function ThankYouPopup({ show, pointsAdded = 10, onClose }: Thank
                   transition={{ duration: 0.45, ease: 'easeOut' }}
                 >
                   <span className="text-2xl font-semibold">+{pointsAdded}</span>
-                  <span className="text-sm text-gray-200">points</span>
+                  <span className="text-sm text-gray-200">karma</span>
                 </motion.div>
               </div>
             </div>

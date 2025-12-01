@@ -3,10 +3,21 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, Send, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
 export function LandingPage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const messages = [
+    'Small acts make big waves.',
+    'A kind word can change a day.',
+    'Leave a little sparkle wherever you go.',
+    'Kindness is a superpower—share it.',
+    'Be the reason someone smiles today.',
+    'Your presence makes this brighter.',
+    'One message can lift a heart.',
+    'Choose kindness, always.',
+  ];
+  const [headline, setHeadline] = useState(messages[0]);
 
   useEffect(() => {
     const checkAuth = () => {
@@ -19,6 +30,11 @@ export function LandingPage() {
     };
 
     checkAuth();
+    // Pick a random message on each page load
+    try {
+      const idx = Math.floor(Math.random() * messages.length);
+      setHeadline(messages[idx]);
+    } catch {}
     const handleStorage = (event: StorageEvent) => {
       if (event.key === 'kinddrop_user') {
         checkAuth();
@@ -33,13 +49,17 @@ export function LandingPage() {
       <header className="glass-header mx-6 my-6 px-8 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
-              <Heart className="w-6 h-6 text-white" />
-            </div>
+            <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
             <span className="text-2xl font-bold text-glow">KindDrop</span>
           </Link>
 
           <div className="flex items-center gap-4">
+            <Link href="/about" className="px-2 py-2 text-[var(--text-lavender)] hover:text-white transition-colors">
+              About
+            </Link>
+            <Link href="/policies" className="px-2 py-2 text-[var(--text-lavender)] hover:text-white transition-colors">
+              Policies
+            </Link>
             {isLoggedIn ? (
               <Link href="/dashboard">
                 <button className="btn-glow">Dashboard</button>
@@ -67,24 +87,21 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-6xl md:text-7xl mb-6 text-glow">
-              I'm so glad you're here.
+            <h1 className="text-5xl md:text-6xl mb-6 text-glow">
+              {headline}
             </h1>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
               <Link href="/dashboard">
-                <button className="btn-outline text-lg px-8 py-4">Get Started for Free</button>
+                <button className="btn-outline text-lg px-8 py-4">Start Spreading 
+                 Kindness</button>
               </Link>
             </div>
           </motion.div>
         </div>
       </main>
 
-      <footer className="mx-6 mb-6 px-8 py-6">
-        <div className="max-w-7xl mx-auto text-center">
-          <span>© 2025 KindDrop. Made with ❤️ for spreading kindness.</span>
-        </div>
-      </footer>
+      {/* Shared footer provided by RootLayout */}
     </div>
   );
 }

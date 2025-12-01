@@ -26,7 +26,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
     // Set a simple cookie for session (for demo purposes)
     res.setHeader('Set-Cookie', `user=${encodeURIComponent(email)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`);
-    return res.status(200).json({ success: true, user: { email: userData.email, points: userData.points } });
+    return res.status(200).json({ success: true, user: { email: userData.email, username: userData.username, points: userData.points } });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
