@@ -18,6 +18,11 @@ export default function RootLayout({
       <body>
         <FloatingGlow />
         <div className="app-shell">{children}</div>
+        <footer className="mx-6 mb-6 px-8 py-6">
+          <div className="max-w-7xl mx-auto text-center">
+            <span>© 2025 Future Tech Club</span>
+          </div>
+        </footer>
       </body>
     </html>
   )

@@ -39,7 +39,7 @@ export function LoginPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         try {
-          localStorage.setItem('kinddrop_user', JSON.stringify({ email: data.user?.email ?? email }));
+          localStorage.setItem('kinddrop_user', JSON.stringify(data.user));
         } catch (storageErr) {
           console.error(storageErr);
         }
