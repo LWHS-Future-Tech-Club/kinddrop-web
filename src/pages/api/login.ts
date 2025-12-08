@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -24,6 +24,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!valid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+    
+    // Update IP address on login
+    const forwarded = req.headers['x-forwarded-for'];
+    const ipAddress = typeof forwarded === 'string' 
+      ? forwarded.split(',')[0].trim() 
+      : req.socket.remoteAddress || 'Unknown';
+    
+    await updateDoc(userRef, {
+      ipAddress,
+      lastLoginAt: Timestamp.now()
+    });
+    
     // Set a simple cookie for session (for demo purposes)
     res.setHeader('Set-Cookie', `user=${encodeURIComponent(email)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`);
     return res.status(200).json({ success: true, user: { email: userData.email, username: userData.username, points: userData.points } });

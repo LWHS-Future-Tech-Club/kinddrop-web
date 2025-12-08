@@ -6,6 +6,7 @@ import { Separator } from './ui/separator';
 import { Sparkles, Check, Lock, ShoppingBag, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Alert, AlertDescription } from './ui/alert';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 interface ShopSectionProps {
   points: number;
@@ -22,6 +23,7 @@ const shopItems: ShopItem[] = [
   
   // Colors
   { id: 'color-black', name: 'Black', type: 'color', value: '#000000', cost: 0, unlocked: true },
+  { id: 'color-white', name: 'White', type: 'color', value: '#FFFFFF', cost: 0, unlocked: true },
   { id: 'color-purple', name: 'Purple', type: 'color', value: '#8B5CF6', cost: 15, unlocked: false },
   { id: 'color-pink', name: 'Pink', type: 'color', value: '#EC4899', cost: 15, unlocked: false },
   { id: 'color-blue', name: 'Blue', type: 'color', value: '#3B82F6', cost: 15, unlocked: false },
@@ -49,63 +51,26 @@ const categories = [
 
 export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProps) {
   return (
-    <div className="space-y-8">
-      {/* Points Card */}
-      <Card className="glass-card bg-gradient-to-br from-purple-900/30 to-pink-900/30 border-purple-500/30">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-sm">
-                <ShoppingBag className="w-7 h-7 text-white" />
-              </div>
-              <div>
-                <div className="text-white/70 mb-1">Your Balance</div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-white text-2xl font-bold">{points}</span>
-                  <span className="text-white/70">points</span>
-                </div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-white/70">Send messages</div>
-              <div className="text-white/70">to earn more</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Info Alert */}
-      <Alert className="glass-card border-purple-500/30 bg-purple-900/20">
-        <Info className="h-4 w-4 text-purple-400" />
-        <AlertDescription className="text-white/80">
-          Unlock customizations to personalize your kindness messages. Each item can be used when composing messages.
-        </AlertDescription>
-      </Alert>
+    <div className="space-y-6 mt-6">
 
       {/* Shop Categories */}
-      {categories.map((category, categoryIndex) => {
-        const items = shopItems.filter((item) => item.type === category.type);
+      <Accordion type="multiple" className="space-y-4">
+        {categories.map((category, categoryIndex) => {
+          const items = shopItems.filter((item) => item.type === category.type);
 
-        return (
-          <motion.div
-            key={category.type}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: categoryIndex * 0.1 }}
-          >
-            <Card className="glass-card border-purple-500/30">
-              <CardHeader>
+          return (
+            <AccordionItem key={category.type} value={category.type} className="glass-card border-purple-500/30 rounded-2xl px-6">
+              <AccordionTrigger className="text-xl hover:no-underline py-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-2xl">{category.icon}</span>
-                  <div>
-                    <CardTitle className="text-white">{category.title}</CardTitle>
-                    <CardDescription className="text-white/70">{category.description}</CardDescription>
+                  <span className="text-3xl">{category.icon}</span>
+                  <div className="text-left">
+                    <div className="text-white text-2xl font-semibold" style={{ fontFamily: "'Instrument Serif', serif" }}>{category.title}</div>
+                    <div className="text-white/70 text-base font-normal" style={{ fontFamily: "'Poppins', sans-serif" }}>{category.description}</div>
                   </div>
                 </div>
-              </CardHeader>
-              <Separator />
-              <CardContent className="p-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              </AccordionTrigger>
+              <AccordionContent className="pb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4">
                   {items.map((item) => {
                     const isUnlocked = unlockedItems.includes(item.id);
                     const canAfford = points >= item.cost;
@@ -161,7 +126,7 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex items-center gap-1 text-white/70">
                                 <Sparkles className="w-4 h-4 text-purple-400" />
-                                <span>{item.cost} pts</span>
+                                <span>{item.cost} K</span>
                               </div>
                               <Button
                                 size="sm"
@@ -186,11 +151,11 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
                     );
                   })}
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        );
-      })}
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
     </div>
   );
 }

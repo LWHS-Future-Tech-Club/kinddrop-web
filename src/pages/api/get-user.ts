@@ -13,6 +13,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(401).json({ error: 'Not authenticated' });
     }
     const email = decodeURIComponent(userCookie.split('=')[1]);
+    
+    // Get user's IP address
+    const forwarded = req.headers['x-forwarded-for'];
+    const ip = typeof forwarded === 'string' 
+      ? forwarded.split(',')[0].trim() 
+      : req.socket.remoteAddress || 'Unknown';
+    
     const snap = await getDoc(doc(db, 'users', email));
     if (!snap.exists()) {
       return res.status(404).json({ error: 'User not found' });
@@ -24,6 +31,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         email: data.email || email,
         username: data.username || null,
         points: typeof data.points === 'number' ? data.points : 0,
+        profileImage: data.profileImage || null,
+        hasRegeneratedUsername: data.hasRegeneratedUsername === true,
+        unlockedItems: Array.isArray(data.unlockedItems) ? data.unlockedItems : [],
+        ipAddress: data.ipAddress || ip,
+        accountType: data.accountType || 'regular',
       }
     });
   } catch (error: any) {
