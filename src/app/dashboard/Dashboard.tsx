@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -60,6 +61,7 @@ export function Dashboard() {
   // Try to read a stored user for display (not required to view dashboard)
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('Friend');
+  const [firstName, setFirstName] = useState<string>('');
   useEffect(() => {
     try {
       const raw = localStorage.getItem('kinddrop_user');
@@ -67,6 +69,7 @@ export function Dashboard() {
         const u = JSON.parse(raw);
         setUserEmail(u?.email ?? null);
         setUsername(u?.username ?? 'Friend');
+        setFirstName(u?.firstName ?? '');
       }
     } catch (err) {
       setUserEmail(null);
@@ -86,6 +89,9 @@ export function Dashboard() {
           }
           if (data?.user?.username) {
             setUsername(data.user.username);
+          }
+          if (data?.user?.firstName) {
+            setFirstName(data.user.firstName);
           }
           if (data?.user?.unlockedItems) {
             setUnlockedItems(data.user.unlockedItems);
@@ -263,9 +269,7 @@ export function Dashboard() {
       <header className="glass-header mx-6 my-6 px-8 py-4">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
-              <Heart className="w-6 h-6 text-white" />
-            </div>
+            <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
             <span className="text-2xl font-bold text-glow">KindDrop</span>
           </Link>
 
@@ -317,7 +321,7 @@ export function Dashboard() {
                   unlockedItems={unlockedItems}
                   onCustomizationChange={handleCustomizationChange}
                   disabled={false}
-                  username={username}
+                  username={firstName || username}
                 />
               ) : (
                 <>
@@ -327,7 +331,7 @@ export function Dashboard() {
                     transition={{ duration: 0.6 }}
                     className="text-4xl md:text-5xl text-glow text-center mt-6"
                   >
-                    Welcome back, {username}!
+                    Welcome back, {firstName || username}!
                   </motion.h1>
 
                   <div className="min-h-[600px] flex items-start justify-center pt-16">

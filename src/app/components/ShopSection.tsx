@@ -25,14 +25,14 @@ const shopItems: ShopItem[] = [
   { id: 'color-black', name: 'Black', type: 'color', value: '#000000', cost: 0, unlocked: true },
   { id: 'color-white', name: 'White', type: 'color', value: '#FFFFFF', cost: 0, unlocked: true },
   { id: 'color-purple', name: 'Purple', type: 'color', value: '#8B5CF6', cost: 15, unlocked: false },
-  { id: 'color-pink', name: 'Pink', type: 'color', value: '#EC4899', cost: 15, unlocked: false },
+  { id: 'color-deep-purple', name: 'Deep Purple', type: 'color', value: '#6D28D9', cost: 15, unlocked: false },
   { id: 'color-blue', name: 'Blue', type: 'color', value: '#3B82F6', cost: 15, unlocked: false },
   { id: 'color-green', name: 'Green', type: 'color', value: '#10B981', cost: 15, unlocked: false },
   
   // Backgrounds
   { id: 'bg-white', name: 'White', type: 'background', value: '#FFFFFF', cost: 0, unlocked: true },
   { id: 'bg-purple', name: 'Light Purple', type: 'background', value: '#F3E8FF', cost: 25, unlocked: false },
-  { id: 'bg-pink', name: 'Light Pink', type: 'background', value: '#FCE7F3', cost: 25, unlocked: false },
+  { id: 'bg-deep-purple', name: 'Lavender', type: 'background', value: '#EDE9FE', cost: 25, unlocked: false },
   { id: 'bg-blue', name: 'Light Blue', type: 'background', value: '#DBEAFE', cost: 25, unlocked: false },
   { id: 'bg-yellow', name: 'Light Yellow', type: 'background', value: '#FEF3C7', cost: 25, unlocked: false },
   
@@ -128,12 +128,14 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
                                 <Sparkles className="w-4 h-4 text-purple-400" />
                                 <span>{item.cost} K</span>
                               </div>
-                              <Button
-                                size="sm"
+                              <button
                                 onClick={() => onUnlock(item)}
                                 disabled={!canAfford || item.cost === 0}
-                                variant={canAfford && item.cost > 0 ? 'default' : 'secondary'}
-                                className={canAfford && item.cost > 0 ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white' : 'bg-white/10 text-white/50'}
+                                className={`h-8 rounded-md gap-1.5 px-3 text-sm font-medium transition-all inline-flex items-center justify-center disabled:pointer-events-none disabled:opacity-50 bg-white/5 ${
+                                  canAfford && item.cost > 0 
+                                    ? 'hover:bg-gradient-to-r hover:from-purple-600 hover:to-violet-600 text-white shadow-sm hover:shadow-md' 
+                                    : 'text-white/50 cursor-not-allowed'
+                                }`}
                               >
                                 {!canAfford ? (
                                   <>
@@ -143,7 +145,7 @@ export function ShopSection({ points, unlockedItems, onUnlock }: ShopSectionProp
                                 ) : (
                                   'Unlock'
                                 )}
-                              </Button>
+                              </button>
                             </div>
                           )}
                         </div>
