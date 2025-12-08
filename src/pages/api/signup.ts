@@ -29,9 +29,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, password } = req.body;
+  const { email, password, firstName } = req.body;
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password required' });
+  }
+  if (!firstName || !firstName.trim()) {
+    return res.status(400).json({ error: 'First name is required' });
   }
 
   try {
@@ -60,10 +63,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await setDoc(userRef, {
       email,
       username,
+      firstName: firstName.trim(),
+      lastName: '',
       password: hashedPassword,
       points: 50,
       profileImage,
       accountType: 'regular',
+      roles: ['user'],
       ipAddress,
       unlockedItems: ['font-sans', 'color-black', 'bg-white', 'size-medium'],
       messages: [],
@@ -80,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     return res.status(201).json({ 
       success: true, 
-      user: { email, username, points: 50, profileImage } 
+      user: { email, username, firstName: firstName.trim(), points: 50, profileImage } 
     });
   } catch (error: any) {
     console.error('Signup error:', error);

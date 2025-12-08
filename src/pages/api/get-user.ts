@@ -25,17 +25,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'User not found' });
     }
     const data = snap.data();
+    
+    // Count messages
+    const sentMessagesCount = Array.isArray(data.sentMessages) ? data.sentMessages.length : 0;
+    const receivedMessagesCount = Array.isArray(data.receivedMessages) ? data.receivedMessages.length : 0;
+    
+    // Format creation date
+    const createdAt = data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : null;
+    
     return res.status(200).json({
       success: true,
       user: {
+        id: email,
         email: data.email || email,
         username: data.username || null,
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
         points: typeof data.points === 'number' ? data.points : 0,
         profileImage: data.profileImage || null,
         hasRegeneratedUsername: data.hasRegeneratedUsername === true,
         unlockedItems: Array.isArray(data.unlockedItems) ? data.unlockedItems : [],
         ipAddress: data.ipAddress || ip,
         accountType: data.accountType || 'regular',
+        roles: Array.isArray(data.roles) ? data.roles : ['user'],
+        sentMessagesCount,
+        receivedMessagesCount,
+        createdAt,
       }
     });
   } catch (error: any) {

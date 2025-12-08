@@ -13,6 +13,7 @@ export function SignUpPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   // Redirect if already logged in
@@ -29,12 +30,18 @@ export function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    if (!firstName.trim()) {
+      setError('Please enter your first name');
+      return;
+    }
+    
     try {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password, firstName: firstName.trim() })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -67,6 +74,18 @@ export function SignUpPage() {
           <p className="mb-6">Join us in spreading kindness</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block mb-2">What should we call you?</label>
+              <input
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="input-glass w-full"
+                placeholder="Your first name"
+                required
+              />
+            </div>
+
             <div>
               <label className="block mb-2">Email</label>
               <input
