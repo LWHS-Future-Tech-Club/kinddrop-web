@@ -45,6 +45,12 @@ export interface MessageData {
   recipientId: string | null;
   recipientEmail: string | null;
   text: string;
+  customization?: {
+    fontFamily?: string;
+    color?: string;
+    backgroundColor?: string;
+    fontSize?: string;
+  };
   timestamp: any;
   status: 'pending' | 'delivered';
 }

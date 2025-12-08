@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const userEmail = decodeURIComponent(userCookie.split('=')[1]);
   
   // Get message text from body
-  const { text } = req.body;
+  const { text, customization } = req.body;
   if (!text || typeof text !== 'string' || text.trim().length === 0) {
     return res.status(400).json({ error: 'Message text required' });
   }
@@ -40,7 +40,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Create message in messages collection
-    const messageResult = await createMessage(userEmail, userEmail, text.trim());
+    const messageResult = await createMessage(userEmail, userEmail, text.trim(), customization || {});
     if (!messageResult.success) {
       return res.status(500).json({ error: 'Failed to create message' });
     }

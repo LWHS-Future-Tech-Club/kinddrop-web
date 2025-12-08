@@ -49,6 +49,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       text: msg.text,
       recipientEmail: msg.recipientEmail ?? null,
       timestampMs: normalizeTs(msg.timestamp),
+      customization: msg.customization || {},
       type: 'sent' as const
     }));
 
@@ -57,6 +58,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       text: msg.text,
       senderEmail: msg.senderEmail ?? null,
       timestampMs: normalizeTs(msg.timestamp),
+      customization: msg.customization || {},
       type: 'received' as const
     }));
 

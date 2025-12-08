@@ -44,10 +44,10 @@ export function Dashboard() {
   const router = useRouter();
   const [points, setPoints] = useState<number>(50);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [unlockedItems, setUnlockedItems] = useState<string[]>(['font-sans', 'color-black', 'bg-white', 'size-medium']);
+  const [unlockedItems, setUnlockedItems] = useState<string[]>(['font-sans', 'color-white', 'bg-white', 'size-medium']);
   const [currentCustomization, setCurrentCustomization] = useState<MessageCustomization>({
-    fontFamily: 'sans-serif',
-    color: '#000000',
+    fontFamily: "'Poppins', sans-serif",
+    color: '#FFFFFF',
     backgroundColor: '#FFFFFF',
     fontSize: 'medium',
   });
@@ -86,6 +86,9 @@ export function Dashboard() {
           }
           if (data?.user?.username) {
             setUsername(data.user.username);
+          }
+          if (data?.user?.unlockedItems) {
+            setUnlockedItems(data.user.unlockedItems);
           }
         }
       } catch (err) {
@@ -152,14 +155,14 @@ export function Dashboard() {
     router.push('/login');
   };
 
-  const handleSendMessage = async (text: string) => {
+  const handleSendMessage = async (text: string, customization: MessageCustomization) => {
     try {
       // Call send-message API
       const sendRes = await fetch('/api/send-message', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ text })
+        body: JSON.stringify({ text, customization })
       });
 
       const sendData = await sendRes.json();
@@ -220,10 +223,29 @@ export function Dashboard() {
     }
   };
 
-  const handleUnlockItem = (item: ShopItem) => {
+  const handleUnlockItem = async (item: ShopItem) => {
     if (points >= item.cost && !unlockedItems.includes(item.id)) {
-      setPoints((p) => p - item.cost);
-      setUnlockedItems((u) => [...u, item.id]);
+      try {
+        console.log('Before unlock - Points:', points, 'Cost:', item.cost);
+        const res = await fetch('/api/unlock-item', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ itemId: item.id, cost: item.cost })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          console.log('After unlock - API response:', data);
+          console.log('Setting points to:', data.newPoints);
+          setPoints(data.newPoints);
+          setUnlockedItems(data.unlockedItems);
+        } else {
+          const err = await res.json();
+          alert(err.error || 'Failed to unlock item');
+        }
+      } catch (err) {
+        console.error('Unlock error:', err);
+      }
     }
   };
 

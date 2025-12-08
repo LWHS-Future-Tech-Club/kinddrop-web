@@ -48,13 +48,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // Generate random username
     const username = generateUsername();
+    
+    // Get user's IP address
+    const forwarded = req.headers['x-forwarded-for'];
+    const ipAddress = typeof forwarded === 'string' 
+      ? forwarded.split(',')[0].trim() 
+      : req.socket.remoteAddress || 'Unknown';
 
     // Create user document
+    const profileImage = `https://api.dicebear.com/9.x/rings/svg?seed=${encodeURIComponent(username)}&backgroundColor=04011E&ringColor=8000FF`;
     await setDoc(userRef, {
       email,
       username,
       password: hashedPassword,
       points: 50,
+      profileImage,
+      accountType: 'regular',
+      ipAddress,
       unlockedItems: ['font-sans', 'color-black', 'bg-white', 'size-medium'],
       messages: [],
       lastSentDate: null,
@@ -70,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     return res.status(201).json({ 
       success: true, 
-      user: { email, username, points: 50 } 
+      user: { email, username, points: 50, profileImage } 
     });
   } catch (error: any) {
     console.error('Signup error:', error);
