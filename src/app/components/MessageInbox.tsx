@@ -54,7 +54,7 @@ export function MessageInbox() {
 
   return (
     <div className="min-h-[500px] p-6">
-      <Tabs defaultValue="received" className="w-full">
+      <Tabs defaultValue="received" valuesOrder={["received", "sent"]} className="w-full">
         <TabsList className="w-full max-w-md mx-auto mb-6">
           <TabsTrigger value="received" className="flex-1">
             <Inbox className="w-4 h-4 mr-2" />

@@ -4,7 +4,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { LogOut, Sparkles, Sun, User, Mail, Lock, Camera, Shield, Calendar, MessageSquare, Hash } from 'lucide-react';
+import PageTransition from '../components/PageTransition';
 import Image from 'next/image';
+import Logo from '../components/Logo';
 import { Button } from '../components/ui/button';
 
 interface UserData {
@@ -270,14 +272,11 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="glass-header mx-6 my-6 px-8 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
-            <span className="text-2xl font-bold text-glow">KindDrop</span>
-          </Link>
+          <Logo />
           <div className="flex items-center gap-4">
             <div className="glass-card px-4 py-2 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[var(--primary)]" />
@@ -301,8 +300,9 @@ export function SettingsPage() {
       </header>
 
       {/* Main content */}
-      <div className="flex items-start justify-center px-4 pb-8">
-        <div className="w-full max-w-4xl">
+      <PageTransition className="flex-1">
+        <div className="flex items-start justify-center px-4 pb-8">
+          <div className="w-full max-w-4xl">
           {/* Message Toast */}
           {message && (
             <div className={`mb-4 p-4 rounded-lg border ${
@@ -585,7 +585,8 @@ export function SettingsPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </PageTransition>
     </div>
   );
 }

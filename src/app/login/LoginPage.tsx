@@ -5,7 +5,8 @@ import React from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart } from 'lucide-react';
+import Logo from '../components/Logo';
+import PageTransition from '../components/PageTransition';
 
 export function LoginPage() {
 
@@ -53,14 +54,11 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <PageTransition className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <Link href="/" className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
-            <Heart className="w-7 h-7 text-white" />
-          </div>
-          <span className="text-3xl font-bold text-glow">KindDrop</span>
-        </Link>
+        <div className="mb-8">
+          <Logo textSize="text-3xl" centered />
+        </div>
 
         <div className="glass-card p-8">
           <h1 className="text-3xl font-bold mb-2 text-glow">Welcome Back</h1>
@@ -105,7 +103,7 @@ export function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
 

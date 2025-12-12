@@ -4,6 +4,13 @@ import { Textarea } from './ui/textarea';
 import { MessageCustomization } from '@/app/dashboard/Dashboard';
 import { Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from './ui/select';
 
 interface MessageComposerProps {
   onSend: (text: string, customization: MessageCustomization) => void;
@@ -59,6 +66,23 @@ export function MessageComposer({
   const unlockedBgs = shopItems.filter(i => i.type === 'background' && unlockedItems.includes(i.id));
   const unlockedSizes = shopItems.filter(i => i.type === 'size' && unlockedItems.includes(i.id));
 
+  const selectedFontId =
+    unlockedFonts.find(i => i.value === currentCustomization.fontFamily)?.id ||
+    unlockedFonts[0]?.id ||
+    'font-sans';
+  const selectedColorId =
+    unlockedColors.find(i => i.value === currentCustomization.color)?.id ||
+    unlockedColors[0]?.id ||
+    'color-black';
+  const selectedBgId =
+    unlockedBgs.find(i => i.value === currentCustomization.backgroundColor)?.id ||
+    unlockedBgs[0]?.id ||
+    'bg-white';
+  const selectedSizeId =
+    unlockedSizes.find(i => i.value === currentCustomization.fontSize)?.id ||
+    unlockedSizes[0]?.id ||
+    'size-medium';
+
   return (
     <div className="min-h-[700px] flex items-center justify-center relative overflow-hidden rounded-2xl p-8">
       {/* Main Content */}
@@ -93,46 +117,81 @@ export function MessageComposer({
           {/* Customization Controls */}
           {!disabled && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-              <select 
-                className="input-glass px-3 py-2 rounded-lg text-sm"
-                value={shopItems.find(i => i.value === currentCustomization.fontFamily)?.id || 'font-sans'}
-                onChange={(e) => {
-                  const item = shopItems.find(i => i.id === e.target.value);
+              <Select
+                value={selectedFontId}
+                onValueChange={(id) => {
+                  const item = shopItems.find(i => i.id === id);
                   if (item) onCustomizationChange({ fontFamily: item.value });
                 }}
               >
-                {unlockedFonts.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
-              </select>
-              <select 
-                className="input-glass px-3 py-2 rounded-lg text-sm"
-                value={shopItems.find(i => i.value === currentCustomization.color)?.id || 'color-black'}
-                onChange={(e) => {
-                  const item = shopItems.find(i => i.id === e.target.value);
+                <SelectTrigger className="input-glass h-9 rounded-lg text-sm bg-transparent border border-[rgba(128,0,255,0.35)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {unlockedFonts.map(i => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={selectedColorId}
+                onValueChange={(id) => {
+                  const item = shopItems.find(i => i.id === id);
                   if (item) onCustomizationChange({ color: item.value });
                 }}
               >
-                {unlockedColors.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
-              </select>
-              <select 
-                className="input-glass px-3 py-2 rounded-lg text-sm"
-                value={shopItems.find(i => i.value === currentCustomization.backgroundColor)?.id || 'bg-white'}
-                onChange={(e) => {
-                  const item = shopItems.find(i => i.id === e.target.value);
+                <SelectTrigger className="input-glass h-9 rounded-lg text-sm bg-transparent border border-[rgba(128,0,255,0.35)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {unlockedColors.map(i => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={selectedBgId}
+                onValueChange={(id) => {
+                  const item = shopItems.find(i => i.id === id);
                   if (item) onCustomizationChange({ backgroundColor: item.value });
                 }}
               >
-                {unlockedBgs.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
-              </select>
-              <select 
-                className="input-glass px-3 py-2 rounded-lg text-sm"
-                value={shopItems.find(i => i.value === currentCustomization.fontSize)?.id || 'size-medium'}
-                onChange={(e) => {
-                  const item = shopItems.find(i => i.id === e.target.value);
+                <SelectTrigger className="input-glass h-9 rounded-lg text-sm bg-transparent border border-[rgba(128,0,255,0.35)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {unlockedBgs.map(i => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select
+                value={selectedSizeId}
+                onValueChange={(id) => {
+                  const item = shopItems.find(i => i.id === id);
                   if (item) onCustomizationChange({ fontSize: item.value });
                 }}
               >
-                {unlockedSizes.map(i => <option key={i.id} value={i.id}>{i.name}</option>)}
-              </select>
+                <SelectTrigger className="input-glass h-9 rounded-lg text-sm bg-transparent border border-[rgba(128,0,255,0.35)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {unlockedSizes.map(i => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
