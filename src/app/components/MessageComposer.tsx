@@ -53,12 +53,31 @@ export function MessageComposer({
   const [message, setMessage] = useState('');
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [warning, setWarning] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (message.trim() && !disabled) {
-      onSend(message, currentCustomization);
-      setMessage('');
-    }
+    if (!message.trim() || disabled) return;
+
+    // Local profanity check before sending
+    try {
+      setWarning(null);
+      const res = await fetch('/api/profanity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: message.trim() })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.flagged) {
+          setWarning('Your message contains inappropriate language and cannot be sent.');
+          return; // do not send
+        }
+      }
+    } catch {}
+
+    onSend(message, currentCustomization);
+    setMessage('');
   };
 
   const unlockedFonts = shopItems.filter(i => i.type === 'font' && unlockedItems.includes(i.id));
@@ -209,6 +228,12 @@ export function MessageComposer({
             }}
             disabled={disabled}
           />
+
+          {warning && (
+            <div className="mt-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-300 text-sm">
+              {warning}
+            </div>
+          )}
 
           {/* Send Button */}
           <div className="relative inline-block mt-10">

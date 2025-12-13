@@ -4,8 +4,10 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut } from 'lucide-react';
+import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut, Shield } from 'lucide-react';
 import Logo from '../components/Logo';
+
+import { DEV_MODE } from '@/lib/devConfig';
 import { motion } from 'framer-motion';
 
 import { MessageComposer } from '../components/MessageComposer';
@@ -285,6 +287,15 @@ export function Dashboard() {
               ) : (
                 <div className="text-sm text-[var(--text-muted)]">Guest</div>
               )} */}
+
+
+              <Link href="/admin">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 mr-1" />
+                  Admin
+                </Button>
+              </Link>
+
 
               <Link href="/settings">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
