@@ -61,6 +61,7 @@ export function Dashboard() {
   const [canSend, setCanSend] = useState<boolean>(true);
   const [canReceive, setCanReceive] = useState<boolean>(true);
   const [receivedMessage, setReceivedMessage] = useState<{text: string, senderEmail: string} | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Try to read a stored user for display (not required to view dashboard)
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -74,10 +75,14 @@ export function Dashboard() {
         setUserEmail(u?.email ?? null);
         setUsername(u?.username ?? 'Friend');
         setFirstName(u?.firstName ?? '');
+        const roles = Array.isArray(u?.roles) ? u.roles : [];
+        const adminFlag = roles.includes('admin') || u?.accountType === 'admin';
+        setIsAdmin(adminFlag);
       }
     } catch (err) {
       setUserEmail(null);
       setUsername('Friend');
+      setIsAdmin(false);
     }
   }, []);
 
@@ -100,6 +105,9 @@ export function Dashboard() {
           if (data?.user?.unlockedItems) {
             setUnlockedItems(data.user.unlockedItems);
           }
+          const roles = Array.isArray(data?.user?.roles) ? data.user.roles : [];
+          const adminFlag = roles.includes('admin') || data?.user?.accountType === 'admin';
+          setIsAdmin(adminFlag);
         }
       } catch (err) {
         // ignore
@@ -282,6 +290,13 @@ export function Dashboard() {
             </div>
 
             <div className="flex items-center gap-4">
+              {isAdmin && (
+                <Link href="/admin">
+                  <Button variant="secondary" size="sm" className="flex items-center gap-2 bg-white/10">
+                    Admin
+                  </Button>
+                </Link>
+              )}
               {/* {userEmail ? (
                 <div className="text-sm text-[var(--text-muted)]">Signed in as <span className="font-medium text-white">{userEmail}</span></div>
               ) : (
@@ -317,10 +332,25 @@ export function Dashboard() {
       <PageTransition className="flex-1">
         <main className="max-w-6xl mx-auto px-0 py-0">
           <Tabs defaultValue="send" valuesOrder={["send", "messages", "shop"]} className="space-y-0">
-            <TabsList className="w-full max-w-3xl mx-auto h-8">
-              <TabsTrigger value="send" className="py-0">Send</TabsTrigger>
-              <TabsTrigger value="messages" className="py-0">Messages</TabsTrigger>
-              <TabsTrigger value="shop" className="py-0">Shop</TabsTrigger>
+            <TabsList className="w-full max-w-3xl mx-auto h-11 bg-white/5 border border-white/10 rounded-full p-1">
+              <TabsTrigger
+                value="send"
+                className="py-0 h-9 text-sm md:text-base text-[rgba(217,200,255,0.85)] data-[state=active]:bg-[rgba(128,0,255,0.18)] data-[state=active]:border-[rgba(128,0,255,0.35)] data-[state=active]:text-white border border-transparent"
+              >
+                Send
+              </TabsTrigger>
+              <TabsTrigger
+                value="messages"
+                className="py-0 h-9 text-sm md:text-base text-[rgba(217,200,255,0.85)] data-[state=active]:bg-[rgba(128,0,255,0.18)] data-[state=active]:border-[rgba(128,0,255,0.35)] data-[state=active]:text-white border border-transparent"
+              >
+                Messages
+              </TabsTrigger>
+              <TabsTrigger
+                value="shop"
+                className="py-0 h-9 text-sm md:text-base text-[rgba(217,200,255,0.85)] data-[state=active]:bg-[rgba(128,0,255,0.18)] data-[state=active]:border-[rgba(128,0,255,0.35)] data-[state=active]:text-white border border-transparent"
+              >
+                Shop
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="send" className="pt-0">

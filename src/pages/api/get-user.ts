@@ -1,18 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import { requireActiveUser } from './_utils/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   try {
-    const cookies = req.headers.cookie?.split(';').map((c) => c.trim()) || [];
-    const userCookie = cookies.find((c) => c.startsWith('user='));
-    if (!userCookie) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    const email = decodeURIComponent(userCookie.split('=')[1]);
+    const auth = await requireActiveUser(req, res);
+    if (!auth.ok) return;
+    const email = auth.email;
     
     // Get user's IP address
     const forwarded = req.headers['x-forwarded-for'];
