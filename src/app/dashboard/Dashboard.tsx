@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut } from 'lucide-react';
+import Logo from '../components/Logo';
 import { motion } from 'framer-motion';
 
 import { MessageComposer } from '../components/MessageComposer';
@@ -15,6 +16,7 @@ import ThankYouPopup from '../components/ThankYouPopup';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import PageTransition from '../components/PageTransition';
 
 // Shared types used by child components
 export interface MessageCustomization {
@@ -268,10 +270,7 @@ export function Dashboard() {
       {/* Header */}
       <header className="glass-header mx-6 my-6 px-8 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
-            <span className="text-2xl font-bold text-glow">KindDrop</span>
-          </Link>
+          <Logo />
 
           <div className="flex items-center gap-4">
             <div className="glass-card px-4 py-2 flex items-center gap-2">
@@ -304,71 +303,73 @@ export function Dashboard() {
       </header>
 
       {/* Main */}
-      <main className="max-w-6xl mx-auto px-0 py-0">
-        <Tabs defaultValue="send" className="space-y-0">
-          <TabsList className="w-full max-w-3xl mx-auto h-8">
-            <TabsTrigger value="send" className="py-0">Send</TabsTrigger>
-            <TabsTrigger value="messages" className="py-0">Messages</TabsTrigger>
-            <TabsTrigger value="shop" className="py-0">Shop</TabsTrigger>
-          </TabsList>
+      <PageTransition className="flex-1">
+        <main className="max-w-6xl mx-auto px-0 py-0">
+          <Tabs defaultValue="send" valuesOrder={["send", "messages", "shop"]} className="space-y-0">
+            <TabsList className="w-full max-w-3xl mx-auto h-8">
+              <TabsTrigger value="send" className="py-0">Send</TabsTrigger>
+              <TabsTrigger value="messages" className="py-0">Messages</TabsTrigger>
+              <TabsTrigger value="shop" className="py-0">Shop</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="send" className="pt-0">
-            <div className="max-w-3xl mx-auto">
-              {canSend ? (
-                <MessageComposer
-                  onSend={handleSendMessage}
-                  currentCustomization={currentCustomization}
-                  unlockedItems={unlockedItems}
-                  onCustomizationChange={handleCustomizationChange}
-                  disabled={false}
-                  username={firstName || username}
-                />
-              ) : (
-                <>
-                  <motion.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="text-4xl md:text-5xl text-glow text-center mt-6"
-                  >
-                    Welcome back, {firstName || username}!
-                  </motion.h1>
+            <TabsContent value="send" className="pt-0">
+              <div className="max-w-3xl mx-auto">
+                {canSend ? (
+                  <MessageComposer
+                    onSend={handleSendMessage}
+                    currentCustomization={currentCustomization}
+                    unlockedItems={unlockedItems}
+                    onCustomizationChange={handleCustomizationChange}
+                    disabled={false}
+                    username={firstName || username}
+                  />
+                ) : (
+                  <>
+                    <motion.h1
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="text-4xl md:text-5xl text-glow text-center mt-6"
+                    >
+                      Welcome back, {firstName || username}!
+                    </motion.h1>
 
-                  <div className="min-h-[600px] flex items-start justify-center pt-16">
-                    <div className="bg-white/10 backdrop-blur-md p-12 rounded-3xl text-center max-w-xl w-full mx-4">
-                      <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                        {canReceive ? 'We are finding a message for you...' : 'You received a message!'}
-                      </h2>
-                      {canReceive ? (
-                        <p className="text-white/80 text-lg md:text-xl">Check back later for a message</p>
-                      ) : receivedMessage ? (
-                        <div>
-                          <p className="text-white text-xl md:text-2xl mb-3">"{receivedMessage.text}"</p>
-                          <p className="text-white/70 text-sm">From: {receivedMessage.senderEmail}</p>
-                        </div>
-                      ) : (
-                        <p className="text-white/80 text-lg md:text-xl">Message received!</p>
-                      )}
+                    <div className="min-h-[600px] flex items-start justify-center pt-16">
+                      <div className="bg-white/10 backdrop-blur-md p-12 rounded-3xl text-center max-w-xl w-full mx-4">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                          {canReceive ? 'We are finding a message for you...' : 'You received a message!'}
+                        </h2>
+                        {canReceive ? (
+                          <p className="text-white/80 text-lg md:text-xl">Check back later for a message</p>
+                        ) : receivedMessage ? (
+                          <div>
+                            <p className="text-white text-xl md:text-2xl mb-3">"{receivedMessage.text}"</p>
+                            <p className="text-white/70 text-sm">From: {receivedMessage.senderEmail}</p>
+                          </div>
+                        ) : (
+                          <p className="text-white/80 text-lg md:text-xl">Message received!</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </TabsContent>
+                  </>
+                )}
+              </div>
+            </TabsContent>
 
-          <TabsContent value="messages" className="pt-0">
-            <div className="max-w-3xl mx-auto">
-              <MessageInbox />
-            </div>
-          </TabsContent>
+            <TabsContent value="messages" className="pt-0">
+              <div className="max-w-3xl mx-auto">
+                <MessageInbox />
+              </div>
+            </TabsContent>
 
-          <TabsContent value="shop" className="pt-0">
-            <div className="max-w-5xl mx-auto">
-              <ShopSection points={points} unlockedItems={unlockedItems} onUnlock={handleUnlockItem} />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </main>
+            <TabsContent value="shop" className="pt-0">
+              <div className="max-w-5xl mx-auto">
+                <ShopSection points={points} unlockedItems={unlockedItems} onUnlock={handleUnlockItem} />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </PageTransition>
     </div>
   );
 }

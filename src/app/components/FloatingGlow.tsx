@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 
 const DEFAULT_SIZE = 420
-const EDGE_PADDING = 32
-const SMOOTHING = 0.08
+const SPRING_TENSION = 0.75
+const SPRING_FRICTION = 0.1
 
 export function FloatingGlow() {
   const glowRef = useRef<HTMLDivElement | null>(null)
@@ -12,6 +12,7 @@ export function FloatingGlow() {
   const animationRef = useRef<number | null>(null)
   const targetRef = useRef<{ x: number; y: number } | null>(null)
   const currentPositionRef = useRef({ top: 0, left: 0 })
+  const velocityRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const clamp = (value: number, min: number, max: number) =>
@@ -42,17 +43,23 @@ export function FloatingGlow() {
         const glowWidth = glowRef.current?.offsetWidth ?? DEFAULT_SIZE
         const glowHeight = glowRef.current?.offsetHeight ?? DEFAULT_SIZE
 
-        const minLeft = EDGE_PADDING
-        const maxLeft = Math.max(EDGE_PADDING, window.innerWidth - glowWidth - EDGE_PADDING)
-        const minTop = EDGE_PADDING
-        const maxTop = Math.max(EDGE_PADDING, window.innerHeight - glowHeight - EDGE_PADDING)
-
-        const desiredLeft = clamp(target.x - glowWidth / 2, minLeft, maxLeft)
-        const desiredTop = clamp(target.y - glowHeight / 2, minTop, maxTop)
+        // Allow the glow to move outside of the viewport by not clamping
+        const desiredLeft = target.x - glowWidth / 2
+        const desiredTop = target.y - glowHeight / 2
 
         const current = currentPositionRef.current
-        const nextLeft = current.left + (desiredLeft - current.left) * SMOOTHING
-        const nextTop = current.top + (desiredTop - current.top) * SMOOTHING
+        const velocity = velocityRef.current
+
+        const forceX = (desiredLeft - current.left) * SPRING_TENSION
+        const forceY = (desiredTop - current.top) * SPRING_TENSION
+
+        const newVelocityX = (velocity.x + forceX) * SPRING_FRICTION
+        const newVelocityY = (velocity.y + forceY) * SPRING_FRICTION
+
+        const nextLeft = current.left + newVelocityX
+        const nextTop = current.top + newVelocityY
+
+        velocityRef.current = { x: newVelocityX, y: newVelocityY }
 
         applyPosition(nextTop, nextLeft)
       }

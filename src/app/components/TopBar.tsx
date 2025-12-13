@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import Logo from './Logo';
 
 export default function TopBar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -27,10 +27,7 @@ export default function TopBar() {
   return (
     <header className="glass-header mx-6 my-6 px-8 py-4">
       <div className="flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-3">
-          <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
-          <span className="text-2xl font-bold text-glow">KindDrop</span>
-        </Link>
+        <Logo />
 
         <div className="flex items-center gap-4">
           <Link href="/about" className="px-2 py-2 text-[var(--text-lavender)] hover:text-white transition-colors">
