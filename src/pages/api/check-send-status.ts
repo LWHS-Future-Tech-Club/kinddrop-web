@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { canSendToday, canReceiveToday } from '../../lib/firestore';
+import { requireActiveUser } from './_utils/auth';
 
 /**
  * GET /api/check-send-status
@@ -14,13 +15,9 @@ export default async function handler(
   }
 
   try {
-    // Get user from cookie (read 'user' cookie set by login/signup)
-    const cookies = req.headers.cookie?.split(';').map((c) => c.trim()) || [];
-    const userCookie = cookies.find((c) => c.startsWith('user='));
-    if (!userCookie) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-    const userEmail = decodeURIComponent(userCookie.split('=')[1]);
+    const auth = await requireActiveUser(req, res);
+    if (!auth.ok) return;
+    const userEmail = auth.email;
 
     // Check if user can send and receive today
     const canSend = await canSendToday(userEmail);

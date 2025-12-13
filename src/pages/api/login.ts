@@ -24,6 +24,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!valid) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
+
+    // Ban check
+    if (userData.banned) {
+      res.setHeader('Set-Cookie', 'user=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+      return res.status(403).json({ error: 'Account is banned' });
+    }
     
     // Update IP address on login
     const forwarded = req.headers['x-forwarded-for'];
@@ -38,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     // Set a simple cookie for session (for demo purposes)
     res.setHeader('Set-Cookie', `user=${encodeURIComponent(email)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`);
-    return res.status(200).json({ success: true, user: { email: userData.email, username: userData.username, points: userData.points } });
+    return res.status(200).json({ success: true, user: { email: userData.email, username: userData.username, points: userData.points, banned: !!userData.banned, roles: userData.roles || [] } });
   } catch (error: any) {
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
