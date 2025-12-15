@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut, Shield } from 'lucide-react';
 import Logo from '../components/Logo';
 
-import { DEV_MODE } from '@/lib/devConfig';
 import { motion } from 'framer-motion';
 
 import { MessageComposer } from '../components/MessageComposer';
@@ -66,7 +65,6 @@ export function Dashboard() {
   // Try to read a stored user for display (not required to view dashboard)
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('Friend');
-  const [firstName, setFirstName] = useState<string>('');
   useEffect(() => {
     try {
       const raw = localStorage.getItem('kinddrop_user');
@@ -74,7 +72,6 @@ export function Dashboard() {
         const u = JSON.parse(raw);
         setUserEmail(u?.email ?? null);
         setUsername(u?.username ?? 'Friend');
-        setFirstName(u?.firstName ?? '');
         const roles = Array.isArray(u?.roles) ? u.roles : [];
         const adminFlag = roles.includes('admin') || u?.accountType === 'admin';
         setIsAdmin(adminFlag);
@@ -98,9 +95,6 @@ export function Dashboard() {
           }
           if (data?.user?.username) {
             setUsername(data.user.username);
-          }
-          if (data?.user?.firstName) {
-            setFirstName(data.user.firstName);
           }
           if (data?.user?.unlockedItems) {
             setUnlockedItems(data.user.unlockedItems);
@@ -206,40 +200,111 @@ export function Dashboard() {
       setTimeout(async () => {
         setShowThanks(false);
 
-        // Call get-message API to receive a message
-        const getRes = await fetch('/api/get-message', {
-          method: 'GET',
-          credentials: 'include'
-        });
+        const processMessage = (payload: any) => {
+          if (payload?.message) {
+            setCanReceive(false);
+            setReceivedMessage({ text: payload.message.text, senderEmail: payload.message.senderEmail });
+            const newMessage: Message = {
+              id: payload.message.id,
+              text: payload.message.text,
+              timestamp: new Date(payload.message.timestamp?.seconds * 1000 || Date.now()),
+              customization: { ...currentCustomization },
+              type: 'received',
+            };
+            setMessages((prev) => [newMessage, ...prev]);
+            return true;
+          }
+          return false;
+        };
 
-        const getData = await getRes.json();
+        const fetchMessageOnce = async () => {
+          const res = await fetch('/api/get-message', { method: 'GET', credentials: 'include' });
+          const data = await res.json();
+          if (res.status === 403) {
+            // Server thinks you already received; sync state to stop waiting UI
+            setCanReceive(false);
+            return {};
+          }
+          return data;
+        };
 
-        if (getData.message) {
-          // Message received! Show it in popup
-          setCanReceive(false);
-          setReceivedMessage({
-            text: getData.message.text,
-            senderEmail: getData.message.senderEmail
-          });
-          
-          // Add to messages feed
-          const newMessage: Message = {
-            id: getData.message.id,
-            text: getData.message.text,
-            timestamp: new Date(getData.message.timestamp?.seconds * 1000 || Date.now()),
-            customization: { ...currentCustomization },
-            type: 'received',
-          };
-          setMessages((prev) => [newMessage, ...prev]);
+        const data = await fetchMessageOnce();
+        if (processMessage(data)) return;
+
+        // If none available yet, poll for a short window
+        let attempts = 0;
+        const maxAttempts = 8; // ~24s total at 3s interval
+        const poll = async () => {
+          attempts += 1;
+          if (attempts > maxAttempts || !canSend) return; // safety
+          try {
+            const nextData = await fetchMessageOnce();
+            if (processMessage(nextData)) return;
+          } catch (err) {
+            // ignore and keep polling
+          }
+          setTimeout(poll, 3000);
+        };
+
+        if (data?.waiting || !data?.message) {
+          // keep canReceive true to show "finding" state and poll
+          poll();
         }
-        // If getData.waiting is true, the UI will already show "check back later" 
-        // because canSend=false and canReceive=true
       }, 2000);
     } catch (error: any) {
       console.error('Error sending message:', error);
       alert('Error: ' + error.message);
     }
   };
+
+  // Background polling while in "waiting" state (sent but not received yet)
+  useEffect(() => {
+    if (canSend || !canReceive) return; // only poll when sent and still waiting to receive
+
+    let canceled = false;
+    const intervalMs = 10000;
+
+    const processMessage = (payload: any) => {
+      if (payload?.message) {
+        setCanReceive(false);
+        setReceivedMessage({ text: payload.message.text, senderEmail: payload.message.senderEmail });
+        const newMessage: Message = {
+          id: payload.message.id,
+          text: payload.message.text,
+          timestamp: new Date(payload.message.timestamp?.seconds * 1000 || Date.now()),
+          customization: { ...currentCustomization },
+          type: 'received',
+        };
+        setMessages((prev) => [newMessage, ...prev]);
+        return true;
+      }
+      return false;
+    };
+
+    const tick = async () => {
+      if (canceled) return;
+      try {
+        const res = await fetch('/api/get-message', { method: 'GET', credentials: 'include' });
+        if (res.status === 403) {
+          setCanReceive(false);
+          return; // stop polling; server says already received today
+        }
+        const data = await res.json();
+        processMessage(data);
+      } catch (err) {
+        // ignore and continue polling
+      }
+      if (!canceled && !document.hidden) {
+        setTimeout(tick, intervalMs);
+      }
+    };
+
+    const timeoutId = setTimeout(tick, intervalMs);
+    return () => {
+      canceled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [canSend, canReceive, currentCustomization]);
 
   const handleUnlockItem = async (item: ShopItem) => {
     if (points >= item.cost && !unlockedItems.includes(item.id)) {
@@ -291,26 +356,12 @@ export function Dashboard() {
 
             <div className="flex items-center gap-4">
               {isAdmin && (
-                <Link href="/admin">
-                  <Button variant="secondary" size="sm" className="flex items-center gap-2 bg-white/10">
-                    Admin
-                  </Button>
-                </Link>
-              )}
-              {/* {userEmail ? (
-                <div className="text-sm text-[var(--text-muted)]">Signed in as <span className="font-medium text-white">{userEmail}</span></div>
-              ) : (
-                <div className="text-sm text-[var(--text-muted)]">Guest</div>
-              )} */}
-
-
-              <Link href="/admin">
+             <Link href="/admin">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Shield className="w-4 h-4 mr-1" />
                   Admin
                 </Button>
               </Link>
-
+              )}
 
               <Link href="/settings">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -362,7 +413,7 @@ export function Dashboard() {
                     unlockedItems={unlockedItems}
                     onCustomizationChange={handleCustomizationChange}
                     disabled={false}
-                    username={firstName || username}
+                    username={username}
                   />
                 ) : (
                   <>
@@ -372,7 +423,7 @@ export function Dashboard() {
                       transition={{ duration: 0.6 }}
                       className="text-4xl md:text-5xl text-glow text-center mt-6"
                     >
-                      Welcome back, {firstName || username}!
+                      Welcome back, {username}!
                     </motion.h1>
 
                     <div className="min-h-[600px] flex items-start justify-center pt-16">

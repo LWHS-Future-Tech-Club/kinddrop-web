@@ -11,13 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const auth = await requireActiveUser(req, res);
     if (!auth.ok) return;
     const email = auth.email;
-    
-    // Get user's IP address
-    const forwarded = req.headers['x-forwarded-for'];
-    const ip = typeof forwarded === 'string' 
-      ? forwarded.split(',')[0].trim() 
-      : req.socket.remoteAddress || 'Unknown';
-    
+
     const snap = await getDoc(doc(db, 'users', email));
     if (!snap.exists()) {
       return res.status(404).json({ error: 'User not found' });
@@ -37,13 +31,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         id: email,
         email: data.email || email,
         username: data.username || null,
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
         points: typeof data.points === 'number' ? data.points : 0,
         profileImage: data.profileImage || null,
         hasRegeneratedUsername: data.hasRegeneratedUsername === true,
         unlockedItems: Array.isArray(data.unlockedItems) ? data.unlockedItems : [],
-        ipAddress: data.ipAddress || ip,
         accountType: data.accountType || 'regular',
         roles: Array.isArray(data.roles) ? data.roles : ['user'],
         sentMessagesCount,

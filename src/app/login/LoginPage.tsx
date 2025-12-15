@@ -12,7 +12,7 @@ export function LoginPage() {
 
 
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +35,7 @@ export function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ username, password })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -66,13 +66,13 @@ export function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block mb-2">Email</label>
+              <label className="block mb-2">Username</label>
               <input
                 type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="input-glass w-full"
-                placeholder="you@example.com"
+                placeholder="Choose a handle (not your real name)"
               />
             </div>
 
@@ -90,6 +90,7 @@ export function LoginPage() {
             <button type="submit" className="btn-glow w-full py-3">
               Log In
             </button>
+            <p className="text-white/60 text-xs mt-2 text-center">Please do NOT use your real name as your username.</p>
             {error && (
               <div className="text-red-500 text-center mt-2">{error}</div>
             )}

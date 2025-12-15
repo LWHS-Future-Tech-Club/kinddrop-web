@@ -20,8 +20,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return {
         email: data.email || docSnap.id,
         username: data.username || '',
-        firstName: data.firstName || '',
-        lastName: data.lastName || '',
         points: typeof data.points === 'number' ? data.points : 0,
         roles: Array.isArray(data.roles) ? data.roles : [],
         accountType: data.accountType || 'regular',

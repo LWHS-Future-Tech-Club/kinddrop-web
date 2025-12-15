@@ -11,7 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const admin = await requireAdmin(req, res);
   if (!admin.ok) return;
 
-  const { email, firstName, username, points, roles, accountType, banned } = req.body || {};
+  const { email, username, points, roles, accountType, banned } = req.body || {};
   if (!email || typeof email !== 'string') {
     return res.status(400).json({ error: 'email is required' });
   }
@@ -24,7 +24,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const updatePayload: Record<string, any> = { updatedAt: Timestamp.now() };
-    if (firstName !== undefined) updatePayload.firstName = firstName;
     if (username !== undefined) updatePayload.username = username;
     if (points !== undefined) updatePayload.points = points;
     if (Array.isArray(roles)) updatePayload.roles = roles;

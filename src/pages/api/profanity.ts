@@ -17,7 +17,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   // Check for profanity
   const isProfane = leoProfanity.check(text);
   const cleaned = leoProfanity.clean(text);
-  const badWords = leoProfanity.list().filter(w => text.toLowerCase().includes(w));
+  const badWords = (leoProfanity.list() as string[]).filter((w: string) => text.toLowerCase().includes(w));
 
   return res.status(200).json({
     flagged: isProfane,
