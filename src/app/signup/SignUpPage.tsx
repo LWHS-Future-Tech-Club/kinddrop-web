@@ -5,15 +5,15 @@ import React from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart } from 'lucide-react';
+import Logo from '../components/Logo';
+import PageTransition from '../components/PageTransition';
 
 export function SignUpPage() {
 
 
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   // Redirect if already logged in
@@ -30,18 +30,34 @@ export function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
-    if (!firstName.trim()) {
-      setError('Please enter your first name');
+    const cleaned = username.trim();
+    const pattern = /^[A-Za-z0-9_]{3,20}$/;
+    if (!pattern.test(cleaned)) {
+      setError('Username must be 3-20 chars, only letters, numbers, or underscores.');
       return;
     }
+    // Client-side profanity check for fast feedback (server validates too)
+    try {
+      const resProf = await fetch('/api/profanity', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: cleaned })
+      });
+      if (resProf.ok) {
+        const dataProf = await resProf.json();
+        if (dataProf.flagged) {
+          setError('Please choose a different username (profanity detected).');
+          return;
+        }
+      }
+    } catch {}
     
     try {
       const res = await fetch('/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password, firstName: firstName.trim() })
+        body: JSON.stringify({ username: cleaned, password })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -60,41 +76,28 @@ export function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <PageTransition className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <Link href="/" className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
-            <Heart className="w-7 h-7 text-white" />
-          </div>
-          <span className="text-3xl font-bold text-glow">KindDrop</span>
-        </Link>
+        <div className="mb-8">
+          <Logo textSize="text-3xl" centered />
+        </div>
 
         <div className="glass-card p-8">
           <h1 className="text-3xl font-bold mb-2 text-glow">Create Account</h1>
-          <p className="mb-6">Join us in spreading kindness</p>
+          <p className="mb-6">Pick a username and password to join.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block mb-2">What should we call you?</label>
+              <label className="block mb-2">Username</label>
               <input
                 type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="input-glass w-full"
-                placeholder="Your first name"
+                placeholder="Choose a handle (not your real name)"
                 required
               />
-            </div>
-
-            <div>
-              <label className="block mb-2">Email</label>
-              <input
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-glass w-full"
-                placeholder="you@example.com"
-              />
+              <p className="text-white/60 text-xs mt-1">Please do NOT use your real name as your username.</p>
             </div>
 
             <div>
@@ -124,7 +127,7 @@ export function SignUpPage() {
           </p>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
 

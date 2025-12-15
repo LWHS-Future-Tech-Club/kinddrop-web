@@ -7,7 +7,6 @@ import { Badge } from '@/app/components/ui/badge';
 import { Switch } from '@/app/components/ui/switch';
 import TopBar from '@/app/components/TopBar';
 import { RefreshCw, Pencil, Ban as BanIcon, ShieldCheck, Trash2 } from 'lucide-react';
-import { AnimatePresence, motion } from 'framer-motion';
 
 interface AdminUser {
   email: string;
@@ -259,14 +258,14 @@ export default function AdminUsersPage() {
         {/* Tabs */}
         <div className="flex gap-3 mt-8">
           <Button
-            variant={activeTab === 'users' ? 'outline' : 'secondary'}
+            variant={activeTab === 'users' ? 'secondary' : 'outline'}
             size="sm"
             onClick={() => setActiveTab('users')}
           >
             Users
           </Button>
           <Button
-            variant={activeTab === 'messages' ? 'outline' : 'secondary'}
+            variant={activeTab === 'messages' ? 'secondary' : 'outline'}
             size="sm"
             onClick={() => setActiveTab('messages')}
           >
@@ -279,18 +278,10 @@ export default function AdminUsersPage() {
           </Button>
         </div>
 
-        <AnimatePresence mode="wait">
-          {activeTab === 'users' && (
-            <motion.div
-              key="users"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
-              className="space-y-6 mt-8"
-            >
+        {activeTab === 'users' && (
+          <div className="grid lg:grid-cols-3 gap-6 mt-8">
             {/* Users list */}
-            <div className="bg-[rgba(7,2,32,0.65)] border border-[rgba(128,0,255,0.16)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+            <div className="lg:col-span-2 bg-[rgba(7,2,32,0.65)] border border-[rgba(128,0,255,0.16)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
               <div className="p-4 border-b border-white/5 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Users</h2>
                 {loading && <span className="text-sm text-[rgba(217,200,255,0.7)]">Loading…</span>}
@@ -359,8 +350,9 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Edit pane */}
-            {selected && (
-              <div className="bg-[rgba(7,2,32,0.65)] border border-[rgba(128,0,255,0.16)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] p-5 flex flex-col gap-4 animate-in fade-in slide-in-from-right duration-200 max-w-2xl">
+            <div className="relative">
+              {selected && (
+                <div className="bg-[rgba(7,2,32,0.65)] border border-[rgba(128,0,255,0.16)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)] p-5 flex flex-col gap-4 animate-in fade-in slide-in-from-right duration-200">
                   <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold">Edit User</h2>
                     <Badge variant="secondary">{selected.email}</Badge>
@@ -423,20 +415,13 @@ export default function AdminUsersPage() {
                     </div>
                   </div>
                 </div>
-            )}
-            </motion.div>
-          )}
+              )}
+            </div>
+          </div>
+        )}
 
-          {activeTab === 'messages' && (
-            <motion.div
-              key="messages"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: [0.33, 1, 0.68, 1] }}
-              className="mt-8"
-            >
-            <div className="bg-[rgba(7,2,32,0.65)] border border-[rgba(128,0,255,0.16)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+        {activeTab === 'messages' && (
+          <div className="mt-8 bg-[rgba(7,2,32,0.65)] border border-[rgba(128,0,255,0.16)] rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
             <div className="p-4 border-b border-white/5 flex items-center justify-between">
               <div>
                 <h2 className="text-lg font-semibold">Messages</h2>
@@ -494,10 +479,8 @@ export default function AdminUsersPage() {
                 </tbody>
               </table>
             </div>
-            </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          </div>
+        )}
       </div>
     </div>
   );

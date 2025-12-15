@@ -2,6 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import bcrypt from 'bcryptjs';
 import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import filter from 'leo-profanity';
 
 // Random username generator
 const generateUsername = (): string => {
@@ -29,17 +30,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { email, password, firstName } = req.body;
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password required' });
+  const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password required' });
   }
-  if (!firstName || !firstName.trim()) {
-    return res.status(400).json({ error: 'First name is required' });
+
+  // Username rules: 3-20 chars, letters/numbers/underscore only, no spaces
+  const cleanedUsername = String(username).trim();
+  const usernamePattern = /^[A-Za-z0-9_]{3,20}$/;
+  if (!usernamePattern.test(cleanedUsername)) {
+    return res.status(400).json({ error: 'Username must be 3-20 characters and use only letters, numbers, or underscores (no spaces).' });
   }
+
+  // Profanity check on username
+  try {
+    filter.loadDictionary();
+    if (filter.check(cleanedUsername)) {
+      return res.status(400).json({ error: 'Please choose a different username (profanity detected).' });
+    }
+  } catch {}
 
   try {
     // Check if user already exists
-    const userRef = doc(db, 'users', email);
+    const userRef = doc(db, 'users', cleanedUsername);
     const userSnap = await getDoc(userRef);
     
     if (userSnap.exists()) {
@@ -48,29 +61,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Generate random username
-    const username = generateUsername();
-    
-    // Get user's IP address
-    const forwarded = req.headers['x-forwarded-for'];
-    const ipAddress = typeof forwarded === 'string' 
-      ? forwarded.split(',')[0].trim() 
-      : req.socket.remoteAddress || 'Unknown';
 
-    // Create user document
-    const profileImage = `https://api.dicebear.com/9.x/rings/svg?seed=${encodeURIComponent(username)}&backgroundColor=04011E&ringColor=8000FF`;
+    // Create user document (no PII)
+    const profileImage = `https://api.dicebear.com/9.x/rings/svg?seed=${encodeURIComponent(cleanedUsername)}&backgroundColor=04011E&ringColor=8000FF`;
     await setDoc(userRef, {
-      email,
-      username,
-      firstName: firstName.trim(),
-      lastName: '',
+      username: cleanedUsername,
       password: hashedPassword,
-      points: 50,
+      points: 0,
       profileImage,
       accountType: 'regular',
       roles: ['user'],
-      ipAddress,
       unlockedItems: ['font-sans', 'color-black', 'bg-white', 'size-medium'],
       messages: [],
       lastSentDate: null,
@@ -82,11 +82,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Set cookie for session
-    res.setHeader('Set-Cookie', `user=${encodeURIComponent(email)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`);
+    res.setHeader('Set-Cookie', `user=${encodeURIComponent(cleanedUsername)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800`);
     
     return res.status(201).json({ 
       success: true, 
-      user: { email, username, firstName: firstName.trim(), points: 50, profileImage } 
+      user: { username: cleanedUsername, points: 0, profileImage } 
     });
   } catch (error: any) {
     console.error('Signup error:', error);

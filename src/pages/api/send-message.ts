@@ -2,21 +2,16 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { canSendToday, createMessage, markMessageSent, addPoints } from '../../lib/firestore';
+import { requireActiveUser } from './_utils/auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Extract user email from cookie
-  const cookies = req.headers.cookie?.split(';').map(c => c.trim()) || [];
-  const userCookie = cookies.find(c => c.startsWith('user='));
-  
-  if (!userCookie) {
-    return res.status(401).json({ error: 'Not authenticated' });
-  }
-
-  const userEmail = decodeURIComponent(userCookie.split('=')[1]);
+  const auth = await requireActiveUser(req, res);
+  if (!auth.ok) return;
+  const userEmail = auth.email;
   
   // Get message text from body
   const { text, customization } = req.body;

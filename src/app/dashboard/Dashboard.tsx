@@ -4,7 +4,9 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut } from 'lucide-react';
+import { Heart, Send, Sparkles, Inbox, ShoppingBag, Sun, LogOut, Shield } from 'lucide-react';
+import Logo from '../components/Logo';
+
 import { motion } from 'framer-motion';
 
 import { MessageComposer } from '../components/MessageComposer';
@@ -15,6 +17,7 @@ import ThankYouPopup from '../components/ThankYouPopup';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import PageTransition from '../components/PageTransition';
 
 // Shared types used by child components
 export interface MessageCustomization {
@@ -57,11 +60,11 @@ export function Dashboard() {
   const [canSend, setCanSend] = useState<boolean>(true);
   const [canReceive, setCanReceive] = useState<boolean>(true);
   const [receivedMessage, setReceivedMessage] = useState<{text: string, senderEmail: string} | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // Try to read a stored user for display (not required to view dashboard)
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [username, setUsername] = useState<string>('Friend');
-  const [firstName, setFirstName] = useState<string>('');
   useEffect(() => {
     try {
       const raw = localStorage.getItem('kinddrop_user');
@@ -69,11 +72,14 @@ export function Dashboard() {
         const u = JSON.parse(raw);
         setUserEmail(u?.email ?? null);
         setUsername(u?.username ?? 'Friend');
-        setFirstName(u?.firstName ?? '');
+        const roles = Array.isArray(u?.roles) ? u.roles : [];
+        const adminFlag = roles.includes('admin') || u?.accountType === 'admin';
+        setIsAdmin(adminFlag);
       }
     } catch (err) {
       setUserEmail(null);
       setUsername('Friend');
+      setIsAdmin(false);
     }
   }, []);
 
@@ -90,12 +96,12 @@ export function Dashboard() {
           if (data?.user?.username) {
             setUsername(data.user.username);
           }
-          if (data?.user?.firstName) {
-            setFirstName(data.user.firstName);
-          }
           if (data?.user?.unlockedItems) {
             setUnlockedItems(data.user.unlockedItems);
           }
+          const roles = Array.isArray(data?.user?.roles) ? data.user.roles : [];
+          const adminFlag = roles.includes('admin') || data?.user?.accountType === 'admin';
+          setIsAdmin(adminFlag);
         }
       } catch (err) {
         // ignore
@@ -194,40 +200,111 @@ export function Dashboard() {
       setTimeout(async () => {
         setShowThanks(false);
 
-        // Call get-message API to receive a message
-        const getRes = await fetch('/api/get-message', {
-          method: 'GET',
-          credentials: 'include'
-        });
+        const processMessage = (payload: any) => {
+          if (payload?.message) {
+            setCanReceive(false);
+            setReceivedMessage({ text: payload.message.text, senderEmail: payload.message.senderEmail });
+            const newMessage: Message = {
+              id: payload.message.id,
+              text: payload.message.text,
+              timestamp: new Date(payload.message.timestamp?.seconds * 1000 || Date.now()),
+              customization: { ...currentCustomization },
+              type: 'received',
+            };
+            setMessages((prev) => [newMessage, ...prev]);
+            return true;
+          }
+          return false;
+        };
 
-        const getData = await getRes.json();
+        const fetchMessageOnce = async () => {
+          const res = await fetch('/api/get-message', { method: 'GET', credentials: 'include' });
+          const data = await res.json();
+          if (res.status === 403) {
+            // Server thinks you already received; sync state to stop waiting UI
+            setCanReceive(false);
+            return {};
+          }
+          return data;
+        };
 
-        if (getData.message) {
-          // Message received! Show it in popup
-          setCanReceive(false);
-          setReceivedMessage({
-            text: getData.message.text,
-            senderEmail: getData.message.senderEmail
-          });
-          
-          // Add to messages feed
-          const newMessage: Message = {
-            id: getData.message.id,
-            text: getData.message.text,
-            timestamp: new Date(getData.message.timestamp?.seconds * 1000 || Date.now()),
-            customization: { ...currentCustomization },
-            type: 'received',
-          };
-          setMessages((prev) => [newMessage, ...prev]);
+        const data = await fetchMessageOnce();
+        if (processMessage(data)) return;
+
+        // If none available yet, poll for a short window
+        let attempts = 0;
+        const maxAttempts = 8; // ~24s total at 3s interval
+        const poll = async () => {
+          attempts += 1;
+          if (attempts > maxAttempts || !canSend) return; // safety
+          try {
+            const nextData = await fetchMessageOnce();
+            if (processMessage(nextData)) return;
+          } catch (err) {
+            // ignore and keep polling
+          }
+          setTimeout(poll, 3000);
+        };
+
+        if (data?.waiting || !data?.message) {
+          // keep canReceive true to show "finding" state and poll
+          poll();
         }
-        // If getData.waiting is true, the UI will already show "check back later" 
-        // because canSend=false and canReceive=true
       }, 2000);
     } catch (error: any) {
       console.error('Error sending message:', error);
       alert('Error: ' + error.message);
     }
   };
+
+  // Background polling while in "waiting" state (sent but not received yet)
+  useEffect(() => {
+    if (canSend || !canReceive) return; // only poll when sent and still waiting to receive
+
+    let canceled = false;
+    const intervalMs = 10000;
+
+    const processMessage = (payload: any) => {
+      if (payload?.message) {
+        setCanReceive(false);
+        setReceivedMessage({ text: payload.message.text, senderEmail: payload.message.senderEmail });
+        const newMessage: Message = {
+          id: payload.message.id,
+          text: payload.message.text,
+          timestamp: new Date(payload.message.timestamp?.seconds * 1000 || Date.now()),
+          customization: { ...currentCustomization },
+          type: 'received',
+        };
+        setMessages((prev) => [newMessage, ...prev]);
+        return true;
+      }
+      return false;
+    };
+
+    const tick = async () => {
+      if (canceled) return;
+      try {
+        const res = await fetch('/api/get-message', { method: 'GET', credentials: 'include' });
+        if (res.status === 403) {
+          setCanReceive(false);
+          return; // stop polling; server says already received today
+        }
+        const data = await res.json();
+        processMessage(data);
+      } catch (err) {
+        // ignore and continue polling
+      }
+      if (!canceled && !document.hidden) {
+        setTimeout(tick, intervalMs);
+      }
+    };
+
+    const timeoutId = setTimeout(tick, intervalMs);
+    return () => {
+      canceled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [canSend, canReceive, currentCustomization]);
 
   const handleUnlockItem = async (item: ShopItem) => {
     if (points >= item.cost && !unlockedItems.includes(item.id)) {
@@ -268,10 +345,7 @@ export function Dashboard() {
       {/* Header */}
       <header className="glass-header mx-6 my-6 px-8 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
-            <span className="text-2xl font-bold text-glow">KindDrop</span>
-          </Link>
+          <Logo />
 
           <div className="flex items-center gap-4">
             <div className="glass-card px-4 py-2 flex items-center gap-2">
@@ -281,11 +355,13 @@ export function Dashboard() {
             </div>
 
             <div className="flex items-center gap-4">
-              {/* {userEmail ? (
-                <div className="text-sm text-[var(--text-muted)]">Signed in as <span className="font-medium text-white">{userEmail}</span></div>
-              ) : (
-                <div className="text-sm text-[var(--text-muted)]">Guest</div>
-              )} */}
+              {isAdmin && (
+             <Link href="/admin">
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  Admin
+                </Button>
+              </Link>
+              )}
 
               <Link href="/settings">
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -304,71 +380,88 @@ export function Dashboard() {
       </header>
 
       {/* Main */}
-      <main className="max-w-6xl mx-auto px-0 py-0">
-        <Tabs defaultValue="send" className="space-y-0">
-          <TabsList className="w-full max-w-3xl mx-auto h-8">
-            <TabsTrigger value="send" className="py-0">Send</TabsTrigger>
-            <TabsTrigger value="messages" className="py-0">Messages</TabsTrigger>
-            <TabsTrigger value="shop" className="py-0">Shop</TabsTrigger>
-          </TabsList>
+      <PageTransition className="flex-1">
+        <main className="max-w-6xl mx-auto px-0 py-0">
+          <Tabs defaultValue="send" valuesOrder={["send", "messages", "shop"]} className="space-y-0">
+            <TabsList className="w-full max-w-3xl mx-auto h-11 bg-white/5 border border-white/10 rounded-full p-1">
+              <TabsTrigger
+                value="send"
+                className="py-0 h-9 text-sm md:text-base text-[rgba(217,200,255,0.85)] data-[state=active]:bg-[rgba(128,0,255,0.18)] data-[state=active]:border-[rgba(128,0,255,0.35)] data-[state=active]:text-white border border-transparent"
+              >
+                Send
+              </TabsTrigger>
+              <TabsTrigger
+                value="messages"
+                className="py-0 h-9 text-sm md:text-base text-[rgba(217,200,255,0.85)] data-[state=active]:bg-[rgba(128,0,255,0.18)] data-[state=active]:border-[rgba(128,0,255,0.35)] data-[state=active]:text-white border border-transparent"
+              >
+                Messages
+              </TabsTrigger>
+              <TabsTrigger
+                value="shop"
+                className="py-0 h-9 text-sm md:text-base text-[rgba(217,200,255,0.85)] data-[state=active]:bg-[rgba(128,0,255,0.18)] data-[state=active]:border-[rgba(128,0,255,0.35)] data-[state=active]:text-white border border-transparent"
+              >
+                Shop
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="send" className="pt-0">
-            <div className="max-w-3xl mx-auto">
-              {canSend ? (
-                <MessageComposer
-                  onSend={handleSendMessage}
-                  currentCustomization={currentCustomization}
-                  unlockedItems={unlockedItems}
-                  onCustomizationChange={handleCustomizationChange}
-                  disabled={false}
-                  username={firstName || username}
-                />
-              ) : (
-                <>
-                  <motion.h1
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                    className="text-4xl md:text-5xl text-glow text-center mt-6"
-                  >
-                    Welcome back, {firstName || username}!
-                  </motion.h1>
+            <TabsContent value="send" className="pt-0">
+              <div className="max-w-3xl mx-auto">
+                {canSend ? (
+                  <MessageComposer
+                    onSend={handleSendMessage}
+                    currentCustomization={currentCustomization}
+                    unlockedItems={unlockedItems}
+                    onCustomizationChange={handleCustomizationChange}
+                    disabled={false}
+                    username={username}
+                  />
+                ) : (
+                  <>
+                    <motion.h1
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="text-4xl md:text-5xl text-glow text-center mt-6"
+                    >
+                      Welcome back, {username}!
+                    </motion.h1>
 
-                  <div className="min-h-[600px] flex items-start justify-center pt-16">
-                    <div className="bg-white/10 backdrop-blur-md p-12 rounded-3xl text-center max-w-xl w-full mx-4">
-                      <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-                        {canReceive ? 'We are finding a message for you...' : 'You received a message!'}
-                      </h2>
-                      {canReceive ? (
-                        <p className="text-white/80 text-lg md:text-xl">Check back later for a message</p>
-                      ) : receivedMessage ? (
-                        <div>
-                          <p className="text-white text-xl md:text-2xl mb-3">"{receivedMessage.text}"</p>
-                          <p className="text-white/70 text-sm">From: {receivedMessage.senderEmail}</p>
-                        </div>
-                      ) : (
-                        <p className="text-white/80 text-lg md:text-xl">Message received!</p>
-                      )}
+                    <div className="min-h-[600px] flex items-start justify-center pt-16">
+                      <div className="bg-white/10 backdrop-blur-md p-12 rounded-3xl text-center max-w-xl w-full mx-4">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                          {canReceive ? 'We are finding a message for you...' : 'You received a message!'}
+                        </h2>
+                        {canReceive ? (
+                          <p className="text-white/80 text-lg md:text-xl">Check back later for a message</p>
+                        ) : receivedMessage ? (
+                          <div>
+                            <p className="text-white text-xl md:text-2xl mb-3">"{receivedMessage.text}"</p>
+                            <p className="text-white/70 text-sm">From: {receivedMessage.senderEmail}</p>
+                          </div>
+                        ) : (
+                          <p className="text-white/80 text-lg md:text-xl">Message received!</p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </TabsContent>
+                  </>
+                )}
+              </div>
+            </TabsContent>
 
-          <TabsContent value="messages" className="pt-0">
-            <div className="max-w-3xl mx-auto">
-              <MessageInbox />
-            </div>
-          </TabsContent>
+            <TabsContent value="messages" className="pt-0">
+              <div className="max-w-3xl mx-auto">
+                <MessageInbox />
+              </div>
+            </TabsContent>
 
-          <TabsContent value="shop" className="pt-0">
-            <div className="max-w-5xl mx-auto">
-              <ShopSection points={points} unlockedItems={unlockedItems} onUnlock={handleUnlockItem} />
-            </div>
-          </TabsContent>
-        </Tabs>
-      </main>
+            <TabsContent value="shop" className="pt-0">
+              <div className="max-w-5xl mx-auto">
+                <ShopSection points={points} unlockedItems={unlockedItems} onUnlock={handleUnlockItem} />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </main>
+      </PageTransition>
     </div>
   );
 }

@@ -273,7 +273,7 @@ export const addPoints = async (userId: string, pointsToAdd: number) => {
 };
 
 // Create a new message
-export const createMessage = async (senderId: string, senderEmail: string, text: string) => {
+export const createMessage = async (senderId: string, senderEmail: string, text: string, customization?: any) => {
   try {
     const messageRef = await addDoc(collection(db, 'messages'), {
       senderId,
@@ -281,6 +281,7 @@ export const createMessage = async (senderId: string, senderEmail: string, text:
       recipientId: null,
       recipientEmail: null,
       text,
+      customization: customization || {},
       timestamp: Timestamp.now(),
       status: 'pending'
     });

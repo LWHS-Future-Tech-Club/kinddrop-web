@@ -3,20 +3,18 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LogOut, Sparkles, Sun, User, Mail, Lock, Camera, Shield, Calendar, MessageSquare, Hash } from 'lucide-react';
+import { LogOut, Sparkles, Sun, User, Lock, Camera, Shield, Calendar, MessageSquare, Hash } from 'lucide-react';
+import PageTransition from '../components/PageTransition';
 import Image from 'next/image';
+import Logo from '../components/Logo';
 import { Button } from '../components/ui/button';
 
 interface UserData {
   id?: string;
-  email?: string;
   username?: string;
-  firstName?: string;
-  lastName?: string;
   points?: number;
   profileImage?: string;
   hasRegeneratedUsername?: boolean;
-  ipAddress?: string;
   accountType?: string;
   roles?: string[];
   sentMessagesCount?: number;
@@ -30,10 +28,6 @@ export function SettingsPage() {
   const [loading, setLoading] = useState(true);
   
   // Form states
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [newEmail, setNewEmail] = useState('');
-  const [emailPassword, setEmailPassword] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -55,8 +49,6 @@ export function SettingsPage() {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
-        setFirstName(data.user.firstName || '');
-        setLastName(data.user.lastName || '');
       }
     } catch (err) {
       console.error('Failed to load user:', err);
@@ -68,68 +60,6 @@ export function SettingsPage() {
   const showMessage = (type: 'success' | 'error', text: string) => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
-  };
-
-  const handleUpdateProfile = async () => {
-    if (!firstName.trim()) {
-      showMessage('error', 'First name is required');
-      return;
-    }
-    
-    setSaving(true);
-    try {
-      const res = await fetch('/api/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ firstName, lastName })
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setUser(prev => ({ ...prev, firstName: data.firstName, lastName: data.lastName }));
-        showMessage('success', 'Profile updated successfully');
-      } else {
-        const err = await res.json();
-        showMessage('error', err.error || 'Failed to update profile');
-      }
-    } catch (err) {
-      showMessage('error', 'Failed to update profile');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleChangeEmail = async () => {
-    if (!newEmail || !emailPassword) {
-      showMessage('error', 'Email and password are required');
-      return;
-    }
-    
-    setSaving(true);
-    try {
-      const res = await fetch('/api/change-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ newEmail, password: emailPassword })
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setUser(prev => ({ ...prev, email: data.email, id: data.email }));
-        setNewEmail('');
-        setEmailPassword('');
-        showMessage('success', 'Email updated successfully');
-      } else {
-        const err = await res.json();
-        showMessage('error', err.error || 'Failed to change email');
-      }
-    } catch (err) {
-      showMessage('error', 'Failed to change email');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleChangePassword = async () => {
@@ -270,14 +200,11 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="glass-header mx-6 my-6 px-8 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="KindDrop" width={74} height={74} className="rounded-full" />
-            <span className="text-2xl font-bold text-glow">KindDrop</span>
-          </Link>
+          <Logo />
           <div className="flex items-center gap-4">
             <div className="glass-card px-4 py-2 flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[var(--primary)]" />
@@ -301,8 +228,9 @@ export function SettingsPage() {
       </header>
 
       {/* Main content */}
-      <div className="flex items-start justify-center px-4 pb-8">
-        <div className="w-full max-w-4xl">
+      <PageTransition className="flex-1">
+        <div className="flex items-start justify-center px-4 pb-8">
+          <div className="w-full max-w-4xl">
           {/* Message Toast */}
           {message && (
             <div className={`mb-4 p-4 rounded-lg border ${
@@ -392,75 +320,12 @@ export function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Name Fields */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-white/60 mb-2">First Name *</label>
-                    <input
-                      type="text"
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
-                      className="input-glass w-full"
-                      placeholder="Your first name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-white/60 mb-2">Last Name (optional)</label>
-                    <input
-                      type="text"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
-                      className="input-glass w-full"
-                      placeholder="Your last name"
-                    />
-                  </div>
-                </div>
-
-                <button 
-                  onClick={handleUpdateProfile} 
-                  className="btn-glow px-6 py-2"
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : 'Save Changes'}
-                </button>
               </div>
             )}
 
             {/* Security Tab */}
             {activeTab === 'security' && (
               <div className="space-y-8">
-                {/* Change Email */}
-                <div className="p-4 bg-white/5 rounded-lg">
-                  <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
-                    <Mail className="w-5 h-5" />
-                    Change Email
-                  </h3>
-                  <p className="text-white/60 text-sm mb-4">Current: {user?.email}</p>
-                  <div className="space-y-3">
-                    <input
-                      type="email"
-                      value={newEmail}
-                      onChange={(e) => setNewEmail(e.target.value)}
-                      className="input-glass w-full"
-                      placeholder="New email address"
-                    />
-                    <input
-                      type="password"
-                      value={emailPassword}
-                      onChange={(e) => setEmailPassword(e.target.value)}
-                      className="input-glass w-full"
-                      placeholder="Confirm with your password"
-                    />
-                    <button 
-                      onClick={handleChangeEmail} 
-                      className="btn-outline px-4 py-2"
-                      disabled={saving}
-                    >
-                      {saving ? 'Updating...' : 'Update Email'}
-                    </button>
-                  </div>
-                </div>
-
                 {/* Change Password */}
                 <div className="p-4 bg-white/5 rounded-lg">
                   <h3 className="font-bold text-lg mb-1 flex items-center gap-2">
@@ -542,12 +407,6 @@ export function SettingsPage() {
                     </div>
                     <div>
                       <span className="text-xs text-white/50 flex items-center gap-1">
-                        <Mail className="w-3 h-3" /> Email
-                      </span>
-                      <p className="font-mono text-sm text-white/80">{user?.email || 'Loading...'}</p>
-                    </div>
-                    <div>
-                      <span className="text-xs text-white/50 flex items-center gap-1">
                         <User className="w-3 h-3" /> Username
                       </span>
                       <p className="font-mono text-sm text-white/80">{user?.username || 'Not set'}</p>
@@ -585,7 +444,8 @@ export function SettingsPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </PageTransition>
     </div>
   );
 }

@@ -5,13 +5,14 @@ import React from 'react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Heart } from 'lucide-react';
+import Logo from '../components/Logo';
+import PageTransition from '../components/PageTransition';
 
 export function LoginPage() {
 
 
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +35,7 @@ export function LoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ username, password })
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -53,14 +54,11 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <PageTransition className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <Link href="/" className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-12 h-12 rounded-full flex items-center justify-center" style={{backgroundColor: '#8000FF'}}>
-            <Heart className="w-7 h-7 text-white" />
-          </div>
-          <span className="text-3xl font-bold text-glow">KindDrop</span>
-        </Link>
+        <div className="mb-8">
+          <Logo textSize="text-3xl" centered />
+        </div>
 
         <div className="glass-card p-8">
           <h1 className="text-3xl font-bold mb-2 text-glow">Welcome Back</h1>
@@ -68,13 +66,13 @@ export function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block mb-2">Email</label>
+              <label className="block mb-2">Username</label>
               <input
                 type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 className="input-glass w-full"
-                placeholder="you@example.com"
+                placeholder="Choose a handle (not your real name)"
               />
             </div>
 
@@ -92,6 +90,7 @@ export function LoginPage() {
             <button type="submit" className="btn-glow w-full py-3">
               Log In
             </button>
+            <p className="text-white/60 text-xs mt-2 text-center">Please do NOT use your real name as your username.</p>
             {error && (
               <div className="text-red-500 text-center mt-2">{error}</div>
             )}
@@ -105,7 +104,7 @@ export function LoginPage() {
           </p>
         </div>
       </div>
-    </div>
+    </PageTransition>
   );
 }
 

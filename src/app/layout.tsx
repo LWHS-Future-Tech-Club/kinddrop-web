@@ -15,9 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen flex flex-col">
         <FloatingGlow />
-        <div className="app-shell">{children}</div>
+        <div className="app-shell flex-1 flex flex-col">{children}</div>
         <footer className="mx-6 mb-6 px-8 py-6">
           <div className="max-w-7xl mx-auto text-center">
             <span>© 2025 Future Tech Club</span>
